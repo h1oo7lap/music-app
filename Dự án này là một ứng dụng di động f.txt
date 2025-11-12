@@ -1,0 +1,32 @@
+Dự án này là một ứng dụng di động full-stack, kết hợp Android Native (Client) với Express.js (Back-end) và MongoDB Atlas (Database). Mục tiêu là xây dựng một app nghe nhạc với hệ thống phân quyền rõ rệt giữa Admin (Quản lý) và User (Người dùng cuối).
+
+II. Danh sách Chức năng Chi tiết
+Dự án được chia thành 3 nhóm chức năng chính:
+
+1. Hệ thống & Phân quyền (Auth)
+Đăng nhập: Người dùng (Admin/User) đăng nhập để nhận JWT Token.
+Xác thực API: Mọi API (trừ đăng nhập) đều yêu cầu Token hợp lệ.
+Phân luồng Giao diện: Ứng dụng Android hiển thị các màn hình khác nhau tùy theo vai trò (Admin hay User).
+
+2. Chức năng Dành cho ADMIN (Quản lý Bài hát - CRUD)
+Create:  – Thêm bài hát mới (tên bài hát, nghệ sĩ, URL MP3, ảnh bài hát, thể loại).
+Read:  – Xem danh sách tất cả bài hát.
+Update:  – Chỉnh sửa thông tin bài hát.
+Delete:  – Xóa bài hát khỏi kho nhạc.
+
+3. Chức năng Dành cho USER (Nghe nhạc & Playlist)
+Nghe nhạc: Hiển thị danh sách nhạc, chọn và phát nhạc từ URL MP3.
+Player Chạy Ngầm: Để nhạc tiếp tục phát khi ứng dụng chạy ngầm
+Điều khiển Play/Pause/Next/Prev
+Quản lý Playlist: Tạo Playlist mới, xem Playlist cá nhân, thêm/xóa bài hát khỏi Playlist, xóa Playlist.
+
+.env
+
+# MONGO_URI
+MONGO_URI="mongodb+srv://hun:101804@cluster0.bxfz0zk.mongodb.net/music-app?appName=Cluster0"
+
+# JWT_SECRET
+JWT_SECRET="random#secret"
+
+# PORT
+PORT=5000
