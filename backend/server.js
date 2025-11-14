@@ -66,6 +66,6 @@ app.use(notFound);
 app.use(errorHandler);
 
 // app.listen() - Sửa lỗi "clean exit"
-app.listen(PORT, () => {
+app.listen(PORT, () => {         // "0.0.0.0" là IP address cơ bản (có nghiệm)
     console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -1,4 +1,4 @@
-Dự án này là một ứng dụng di động full-stack, kết hợp Android Native (Client) với Express.js (Back-end) và MongoDB Atlas (Database). Mục tiêu là xây dựng một app nghe nhạc với hệ thống phân quyền rõ rệt giữa Admin (Quản lý) và User (Người dùng cuối).
+Dự án này là một ứng dụng di động full-stack, kết hợp Android Native (Client - Android studio) với Express.js (Back-end) và MongoDB Atlas (Database). Mục tiêu là xây dựng một app nghe nhạc với hệ thống phân quyền rõ rệt giữa Admin (Quản lý) và User (Người dùng cuối).
 
 II. Danh sách Chức năng Chi tiết
 Dự án được chia thành 3 nhóm chức năng chính:
