@@ -6,7 +6,7 @@ const router = express.Router();
 import { createSongController, getAllSongsController, deleteSongController, updateSongController, getSongByIdController, incrementPlayCountController, getTopSongsController } from '../controllers/songController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 import { isAdmin } from '../middlewares/roleMiddleware.js';
-import upload from '../config/multerConfig.js'; // 🆕 Import Multer
+import upload from '../config/multerConfig.js';
 
 // Cấu hình Multer để nhận 2 field: songFile (tối đa 1 file) và albumImage (tối đa 1 file)
 const songUploadMiddleware = upload.fields([

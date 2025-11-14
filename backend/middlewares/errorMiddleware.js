@@ -9,10 +9,14 @@ const notFound = (req, res, next) => {
 
 // Middleware xử lý lỗi chung
 const errorHandler = (err, req, res, next) => {
-    // Nếu status code vẫn là 200, đặt thành 500 (Internal Server Error)
-    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-    res.status(statusCode);
 
+    // 1. Lấy statusCode từ lỗi (err.statusCode) nếu có, nếu không thì lấy từ res.statusCode
+    let statusCode = err.statusCode || res.statusCode;
+
+    // 2. Nếu status code vẫn là 200, đặt thành 500, nếu không thì giữ nguyên (bao gồm 401 từ Service)
+    statusCode = statusCode === 200 ? 500 : statusCode;
+
+    // 3. Khởi tạo lại errorMessage
     let errorMessage = err.message;
 
     // Xử lý lỗi Mongoose CastError (ví dụ: ID không hợp lệ)
@@ -21,7 +25,7 @@ const errorHandler = (err, req, res, next) => {
         errorMessage = 'Định dạng ID không hợp lệ.';
     }
 
-    res.json({
+    res.status(statusCode).json({ // ⬅️ Dùng statusCode đã được xác định
         message: errorMessage,
         // Chỉ trả về stack trace khi ở môi trường phát triển (development)
         stack: process.env.NODE_ENV === 'production' ? null : err.stack,

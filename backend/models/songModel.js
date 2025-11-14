@@ -24,6 +24,7 @@ const songSchema = new mongoose.Schema({
     duration: { // Thời lượng bài hát (tính bằng giây)
         type: Number,
         required: [true, 'Thời lượng là bắt buộc.'],
+        default: 0 // Tùy chọn: đặt default để đảm bảo luôn là số,
     },
     imageUrl: { // URL ảnh bìa (sẽ dùng Multer để upload sau)
         type: String,

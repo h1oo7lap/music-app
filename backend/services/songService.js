@@ -3,6 +3,7 @@
 import Song from '../models/songModel.js';
 import Genre from '../models/genreModel.js';
 import fs from 'fs';
+import { ApiError } from '../utils/errorUtils.js'; // 🆕 Import ApiError
 
 /**
  * Lưu metadata bài hát vào MongoDB
@@ -12,7 +13,8 @@ const createSongService = async (songData) => {
     // Tùy chọn: Kiểm tra xem ID Genre có tồn tại không
     const genreExists = await Genre.findById(songData.genre);
     if (!genreExists) {
-        throw new Error('Thể loại không tồn tại.');
+        // 🚨 Dùng ApiError 404
+        throw new ApiError('Thể loại không tồn tại.', 404);
     }
 
     const song = await Song.create(songData);
@@ -20,17 +22,7 @@ const createSongService = async (songData) => {
     return song;
 };
 
-/**
- * Lấy tất cả bài hát
- */
 
-// const getAllSongsService = async () => {
-//     // 💡 .populate('genre') để lấy toàn bộ object Genre thay vì chỉ ID
-//     const songs = await Song.find({})
-//         .populate('genre', 'name') // Chỉ lấy trường 'name' của Genre
-//         .select('-__v');
-//     return songs;
-// };
 
 const getAllSongsService = async (keyword = '', page = 1, limit = 10) => {
 
@@ -74,23 +66,23 @@ const deleteSongService = async (id) => {
     const song = await Song.findById(id);
 
     if (!song) {
-        throw new Error('Không tìm thấy bài hát để xóa.');
+        // 🚨 Dùng ApiError 404
+        throw new ApiError('Không tìm thấy bài hát để xóa.', 404);
     }
 
     // 2. Xóa các file liên quan trên server (Local Storage)
-    // Trong production, bạn sẽ thay thế bằng logic xóa file trên S3/Cloudinary
     try {
         fs.unlinkSync(song.songUrl); // Xóa file MP3
         if (song.imageUrl) {
             fs.unlinkSync(song.imageUrl); // Xóa file ảnh bìa (nếu có)
         }
     } catch (error) {
-        // Log lỗi nhưng không dừng tiến trình (có thể file đã bị xóa thủ công)
+        // Log lỗi nhưng không dừng tiến trình
         console.error(`Không thể xóa file: ${error.message}`);
     }
 
     // 3. Xóa bản ghi trong MongoDB
-    await Song.deleteOne({ _id: id }); // Thay thế findByIdAndDelete để đảm bảo file đã được xử lý trước
+    await Song.deleteOne({ _id: id });
 
     return song;
 };
@@ -103,7 +95,8 @@ const updateSongService = async (id, updatedData) => {
     const song = await Song.findById(id);
 
     if (!song) {
-        throw new Error('Không tìm thấy bài hát để cập nhật.');
+        // 🚨 Dùng ApiError 404
+        throw new ApiError('Không tìm thấy bài hát để cập nhật.', 404);
     }
 
     // 1. Xử lý xóa file cũ nếu có file mới được upload
@@ -118,12 +111,22 @@ const updateSongService = async (id, updatedData) => {
         } catch (error) { console.error(`Lỗi xóa file ảnh cũ: ${error.message}`); }
     }
 
+    // Tùy chọn: Kiểm tra lại ID Genre nếu có cập nhật
+    if (updatedData.genre) {
+        const genreExists = await Genre.findById(updatedData.genre);
+        if (!genreExists) {
+            // 🚨 Dùng ApiError 404
+            throw new ApiError('Thể loại không tồn tại.', 404);
+        }
+    }
+
+
     // 2. Cập nhật bản ghi trong MongoDB
     const updatedSong = await Song.findByIdAndUpdate(
         id,
-        { $set: updatedData }, // Dùng $set để cập nhật linh hoạt các trường
+        { $set: updatedData },
         { new: true, runValidators: true }
-    ).populate('genre', 'name'); // Populate để trả về tên thể loại
+    ).populate('genre', 'name');
 
     return updatedSong;
 };
@@ -138,7 +141,8 @@ const getSongByIdService = async (id) => {
         .select('-__v');
 
     if (!song) {
-        throw new Error('Không tìm thấy bài hát.');
+        // 🚨 Dùng ApiError 404
+        throw new ApiError('Không tìm thấy bài hát.', 404);
     }
     return song;
 };
@@ -155,7 +159,8 @@ const incrementPlayCountService = async (songId) => {
     );
 
     if (!updatedSong) {
-        throw new Error('Không tìm thấy bài hát để cập nhật lượt nghe.');
+        // 🚨 Dùng ApiError 404
+        throw new ApiError('Không tìm thấy bài hát để cập nhật lượt nghe.', 404);
     }
 
     // Chỉ trả về lượt nghe mới

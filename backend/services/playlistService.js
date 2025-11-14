@@ -1,6 +1,8 @@
 // /backend/services/playlistService.js
 
 import Playlist from '../models/playlistModel.js';
+import { ApiError } from '../utils/errorUtils.js'; // 🆕 Import ApiError
+import Song from '../models/songModel.js'; // 🆕 IMPORT Song model
 
 /**
  * Tạo Playlist mới
@@ -38,8 +40,8 @@ const deletePlaylistService = async (playlistId, userId) => {
     });
 
     if (!playlist) {
-        // Có thể là không tìm thấy ID, hoặc tìm thấy nhưng không phải của User này
-        throw new Error('Không tìm thấy Playlist hoặc bạn không có quyền xóa.');
+        // 🚨 Dùng ApiError 404
+        throw new ApiError('Không tìm thấy Playlist hoặc bạn không có quyền xóa.', 404);
     }
     return playlist;
 };
@@ -48,19 +50,28 @@ const deletePlaylistService = async (playlistId, userId) => {
  * Thêm bài hát vào Playlist
  */
 const addSongToPlaylistService = async (playlistId, songId, userId) => {
-    // 1. Tìm Playlist và đảm bảo thuộc về User
+
+    // 1.  KIỂM TRA BÀI HÁT TỒN TẠI
+    const songExists = await Song.findById(songId);
+    if (!songExists) {
+        throw new ApiError('Bài hát không tồn tại.', 404); 
+    }
+
+    //  Tìm Playlist và đảm bảo thuộc về User
     const playlist = await Playlist.findOne({
         _id: playlistId,
         user: userId
     });
 
     if (!playlist) {
-        throw new Error('Playlist không tồn tại hoặc bạn không có quyền chỉnh sửa.');
+        // 🚨 Dùng ApiError 404
+        throw new ApiError('Playlist không tồn tại hoặc bạn không có quyền chỉnh sửa.', 404);
     }
 
     // 2. Ngăn chặn trùng lặp
     if (playlist.songs.includes(songId)) {
-        throw new Error('Bài hát đã có trong Playlist.');
+        // 🚨 Dùng ApiError 400 cho lỗi Validation/Nghiệp vụ
+        throw new ApiError('Bài hát đã có trong Playlist.', 400);
     }
 
     // 3. Thêm bài hát (sử dụng $push trong Mongoose)
@@ -77,16 +88,26 @@ const addSongToPlaylistService = async (playlistId, songId, userId) => {
  * Xóa bài hát khỏi Playlist
  */
 const removeSongFromPlaylistService = async (playlistId, songId, userId) => {
+
+    // 1. 🆕 KIỂM TRA BÀI HÁT TỒN TẠI (Đảm bảo ID hợp lệ và tồn tại)
+    const songExists = await Song.findById(songId);
+    if (!songExists) {
+        // Có thể chọn trả về 404 hoặc 400 tùy ý. 404 là hợp lý hơn.
+        throw new ApiError('Bài hát không tồn tại.', 404); 
+    }
+
     const playlist = await Playlist.findOne({
         _id: playlistId,
         user: userId
     });
 
     if (!playlist) {
-        throw new Error('Playlist không tồn tại hoặc bạn không có quyền chỉnh sửa.');
+        // 🚨 Dùng ApiError 404
+        throw new ApiError('Playlist không tồn tại hoặc bạn không có quyền chỉnh sửa.', 404);
     }
 
     // Xóa bài hát (sử dụng $pull trong Mongoose)
+    // Lưu ý: Nếu songId không tồn tại trong mảng, $pull vẫn sẽ chạy và không gây lỗi.
     playlist.songs.pull(songId);
     await playlist.save();
 

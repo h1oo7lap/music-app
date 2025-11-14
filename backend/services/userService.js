@@ -1,7 +1,8 @@
 // /backend/services/userService.js
 
 import User from '../models/userModel.js';
-// Bạn cần đảm bảo bạn đã import User model.
+import { ApiError } from '../utils/errorUtils.js'; // 🆕 Import ApiError
+import Song from '../models/songModel.js'; // 🆕 Đảm bảo đã import Song model
 
 /**
  * Thêm hoặc xóa bài hát khỏi danh sách yêu thích
@@ -9,11 +10,18 @@ import User from '../models/userModel.js';
  * @param {string} songId - ID bài hát
  */
 const toggleFavoriteService = async (userId, songId) => {
-    // 1. Tìm kiếm User
+    // 1. Tìm kiếm User và bài hát
+
+    const songExists = await Song.findById(songId);
+    if (!songExists) {
+        throw new ApiError('Bài hát không tồn tại.', 404);
+    }
+
     const user = await User.findById(userId);
 
     if (!user) {
-        throw new Error('Không tìm thấy người dùng.');
+        // 🚨 Dùng ApiError 404 khi không tìm thấy người dùng
+        throw new ApiError('Không tìm thấy người dùng.', 404);
     }
 
     // 2. Kiểm tra xem bài hát đã có trong danh sách yêu thích chưa
@@ -46,7 +54,8 @@ const getFavoritesService = async (userId) => {
         .select('favoriteSongs');
 
     if (!user) {
-        throw new Error('Không tìm thấy người dùng.');
+        // 🚨 Dùng ApiError 404 khi không tìm thấy người dùng
+        throw new ApiError('Không tìm thấy người dùng.', 404);
     }
     return user.favoriteSongs;
 };

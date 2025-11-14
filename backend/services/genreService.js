@@ -1,6 +1,7 @@
 // /backend/services/genreService.js
 
 import Genre from '../models/genreModel.js';
+import { ApiError } from '../utils/errorUtils.js'; // 🆕 Import ApiError
 
 /**
  * Tạo thể loại mới
@@ -9,10 +10,11 @@ const createGenreService = async ({ name }) => {
     // 1. Kiểm tra tồn tại (để tránh lỗi Mongoose Duplicate Key)
     const genreExists = await Genre.findOne({ name });
     if (genreExists) {
-        throw new Error(`Thể loại "${name}" đã tồn tại.`);
+        // 🚨 Dùng ApiError 400 cho lỗi trùng lặp
+        throw new ApiError(`Thể loại "${name}" đã tồn tại.`, 400);
     }
 
-    // 2. Tạo và lưu Genre (Logic tạo slug sẽ được thêm vào Model sau)
+    // 2. Tạo và lưu Genre
     const genre = await Genre.create({ name });
 
     return genre;
@@ -22,7 +24,7 @@ const createGenreService = async ({ name }) => {
  * Lấy tất cả thể loại
  */
 const getAllGenresService = async () => {
-    const genres = await Genre.find({}).select('-__v'); // Loại bỏ trường __v
+    const genres = await Genre.find({}).select('-__v');
     return genres;
 };
 
@@ -33,7 +35,8 @@ const deleteGenreService = async (id) => {
     const genre = await Genre.findByIdAndDelete(id);
 
     if (!genre) {
-        throw new Error('Không tìm thấy thể loại để xóa.');
+        // 🚨 Dùng ApiError 404 khi không tìm thấy
+        throw new ApiError('Không tìm thấy thể loại để xóa.', 404);
     }
     return genre;
 };
@@ -42,15 +45,23 @@ const deleteGenreService = async (id) => {
  * Cập nhật thể loại theo ID
  */
 const updateGenreService = async (id, name) => {
+
+    // 💡 Tùy chọn: Kiểm tra trùng tên trước khi update
+    const genreExists = await Genre.findOne({ name, _id: { $ne: id } });
+    if (genreExists) {
+        throw new ApiError(`Thể loại "${name}" đã tồn tại.`, 400);
+    }
+
     // Tìm và cập nhật Genre
     const updatedGenre = await Genre.findByIdAndUpdate(
         id,
-        { name }, // Chỉ cập nhật trường name
-        { new: true, runValidators: true } // Trả về bản ghi mới, chạy validation
+        { name },
+        { new: true, runValidators: true }
     );
 
     if (!updatedGenre) {
-        throw new Error('Không tìm thấy thể loại để cập nhật.');
+        // 🚨 Dùng ApiError 404 khi không tìm thấy
+        throw new ApiError('Không tìm thấy thể loại để cập nhật.', 404);
     }
     return updatedGenre;
 };
@@ -59,10 +70,11 @@ const updateGenreService = async (id, name) => {
  * Lấy một thể loại theo ID
  */
 const getGenreByIdService = async (id) => {
-    const genre = await Genre.findById(id).select('-__v'); 
+    const genre = await Genre.findById(id).select('-__v');
 
     if (!genre) {
-        throw new Error('Không tìm thấy thể loại.');
+        // 🚨 Dùng ApiError 404 khi không tìm thấy
+        throw new ApiError('Không tìm thấy thể loại.', 404);
     }
     return genre;
 };

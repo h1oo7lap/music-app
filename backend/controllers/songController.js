@@ -1,38 +1,55 @@
 // /backend/controllers/songController.js
 
-import { createSongService, getAllSongsService, deleteSongService, updateSongService, getSongByIdService, incrementPlayCountService, getTopSongsService } from '../services/songService.js'; // Sẽ tạo service này sau
+import asyncHandler from 'express-async-handler';
+import { createSongService, getAllSongsService, deleteSongService, updateSongService, getSongByIdService, incrementPlayCountService, getTopSongsService } from '../services/songService.js';
+import { getSongDuration } from '../utils/getSongDuration.js';
+import fs from 'fs';
 
 // @desc    Tạo bài hát mới (bao gồm upload file)
 // @route   POST /api/songs
 // @access  Private/Admin
-const createSongController = async (req, res, next) => {
+
+const createSongController = asyncHandler(async (req, res, next) => {
+
+    // Lấy file từ req.files (Multer gán vào)
+    const songFile = req.files['songFile'] ? req.files['songFile'][0] : null;
+    const albumImage = req.files['albumImage'] ? req.files['albumImage'][0] : null;
+
+    // Khai báo hàm dọn dẹp file (Cleanup Logic)
+    const cleanupFiles = () => {
+        if (songFile && fs.existsSync(songFile.path)) {
+            fs.unlinkSync(songFile.path);
+        }
+        if (albumImage && fs.existsSync(albumImage.path)) {
+            fs.unlinkSync(albumImage.path);
+        }
+    };
+
     try {
-        // Lấy dữ liệu văn bản từ req.body
-        const { title, artist, genre, duration } = req.body;
+        // Lấy dữ liệu văn bản từ req.body (BỎ duration)
+        const { title, artist, genre } = req.body;
 
-        // 💡 Lấy đường dẫn file từ req.files (Multer gán vào)
-        // Multer sẽ lưu trữ các thông tin này vào req.files:
-        const songFile = req.files['songFile'] ? req.files['songFile'][0] : null;
-        const albumImage = req.files['albumImage'] ? req.files['albumImage'][0] : null;
-
-        // 1. Kiểm tra dữ liệu bắt buộc
+        // 1. Kiểm tra dữ liệu bắt buộc (Lỗi 400 Validation)
         if (!title || !artist || !genre || !songFile) {
-            // 🚨 Chúng ta cần xóa file đã upload nếu kiểm tra thất bại ở đây (logic sẽ thêm sau)
-            return res.status(400).json({ message: 'Tiêu đề, nghệ sĩ, thể loại và file nhạc là bắt buộc.' });
+            res.status(400);
+            throw new Error('Tiêu đề, nghệ sĩ, thể loại và file nhạc là bắt buộc.');
         }
 
-        // 2. Chuẩn bị dữ liệu cho Service
+        // 2. Tính toán Duration TỰ ĐỘNG
+        // 🚨 CHÚ Ý: Đảm bảo hàm này trả về một giá trị số (ví dụ: 0 nếu lỗi)
+        const durationInSeconds = await getSongDuration(songFile.path);
+
+        // 3. Chuẩn bị dữ liệu cho Service
         const songData = {
             title,
             artist,
             genre,
-            duration: Number(duration),
-            songUrl: songFile.path,         // Đường dẫn file MP3 cục bộ
-            imageUrl: albumImage ? albumImage.path : null, // Đường dẫn ảnh bìa cục bộ
-            // userId: req.user._id, // Nếu bạn muốn lưu ID người tạo
+            duration: durationInSeconds, // ⬅️ DURATION ĐƯỢC TÍNH TỰ ĐỘNG
+            songUrl: songFile.path,
+            imageUrl: albumImage ? albumImage.path : null,
         };
 
-        // 3. Gọi Service để lưu metadata vào DB
+        // 4. Gọi Service để lưu metadata vào DB
         const newSong = await createSongService(songData);
 
         res.status(201).json({
@@ -41,154 +58,117 @@ const createSongController = async (req, res, next) => {
         });
 
     } catch (error) {
-        // ... (Xử lý lỗi)
-        res.status(500).json({ message: 'Server error: ' + error.message });
+        // 5. Bắt lỗi (từ validation, service 404, hoặc DB 500) và DỌN DẸP FILE
+        cleanupFiles();
+
+        // 6. Ném lỗi lại để Global Error Handler bắt và trả về response JSON đồng bộ
+        throw error;
     }
-};
+});
 
 // @desc    Lấy tất cả bài hát
 // @route   GET /api/songs
 // @access  Public
+const getAllSongsController = asyncHandler(async (req, res, next) => {
 
-// const getAllSongsController = async (req, res, next) => {
-//     try {
-//         const songs = await getAllSongsService();
-//         res.status(200).json(songs);
-//     } catch (error) {
-//         res.status(500).json({ message: 'Server error: ' + error.message });
-//     }
-// };
+    // Lấy tham số truy vấn (Query Params) từ req.query
+    const keyword = req.query.keyword || '';
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
-const getAllSongsController = async (req, res, next) => {
-    try {
-        // Lấy tham số truy vấn (Query Params) từ req.query
-        const keyword = req.query.keyword || '';
-        // parseInt để đảm bảo page và limit là số nguyên.
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+    // Gọi service với các tham số mới (Lỗi sẽ được tự động chuyển tiếp)
+    const data = await getAllSongsService(keyword, page, limit);
 
-        // Gọi service với các tham số mới
-        const data = await getAllSongsService(keyword, page, limit);
+    res.status(200).json(data);
 
-        res.status(200).json(data); // Trả về đối tượng data đã có thông tin phân trang
-
-    } catch (error) {
-        res.status(500).json({ message: 'Server error: ' + error.message });
-    }
-};
+});
 
 // @desc    Xóa bài hát theo ID
 // @route   DELETE /api/songs/:id
 // @access  Private/Admin
-const deleteSongController = async (req, res, next) => {
-    try {
-        const deletedSong = await deleteSongService(req.params.id);
+const deleteSongController = asyncHandler(async (req, res, next) => {
 
-        res.status(200).json({
-            message: 'Bài hát đã được xóa thành công và các file đã được gỡ bỏ.',
-            song: deletedSong
-        });
+    // Logic 404/CastError/500 sẽ được errorMiddleware xử lý
+    const deletedSong = await deleteSongService(req.params.id);
 
-    } catch (error) {
-        if (error.message.includes('Không tìm thấy')) {
-            return res.status(404).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Server error: ' + error.message });
-    }
-};
+    res.status(200).json({
+        message: 'Bài hát đã được xóa thành công và các file đã được gỡ bỏ.',
+        song: deletedSong
+    });
+
+});
 
 // @desc    Cập nhật bài hát theo ID (hỗ trợ upload file)
 // @route   PUT /api/songs/:id
 // @access  Private/Admin
-const updateSongController = async (req, res, next) => {
-    try {
-        const { title, artist, genre, duration } = req.body;
+const updateSongController = asyncHandler(async (req, res, next) => {
 
-        // Dữ liệu mới được gửi
-        const updatedData = {
-            title,
-            artist,
-            genre,
-            duration: duration ? Number(duration) : undefined,
-        };
+    const { title, artist, genre, duration } = req.body;
 
-        // 💡 Kiểm tra nếu có file mới, cập nhật đường dẫn vào updatedData
-        if (req.files && req.files['songFile']) {
-            updatedData.songUrl = req.files['songFile'][0].path;
-        }
-        if (req.files && req.files['albumImage']) {
-            updatedData.imageUrl = req.files['albumImage'][0].path;
-        }
+    // Dữ liệu mới được gửi
+    const updatedData = {
+        title,
+        artist,
+        genre,
+        duration: duration ? Number(duration) : undefined,
+    };
 
-        const updatedSong = await updateSongService(req.params.id, updatedData);
-
-        res.status(200).json({
-            message: 'Bài hát đã được cập nhật thành công.',
-            song: updatedSong
-        });
-
-    } catch (error) {
-        // ... (Xử lý lỗi)
-        res.status(500).json({ message: 'Server error: ' + error.message });
+    // Kiểm tra nếu có file mới, cập nhật đường dẫn vào updatedData
+    if (req.files && req.files['songFile']) {
+        updatedData.songUrl = req.files['songFile'][0].path;
     }
-};
+    if (req.files && req.files['albumImage']) {
+        updatedData.imageUrl = req.files['albumImage'][0].path;
+    }
+
+    const updatedSong = await updateSongService(req.params.id, updatedData);
+
+    res.status(200).json({
+        message: 'Bài hát đã được cập nhật thành công.',
+        song: updatedSong
+    });
+
+});
 
 // @desc    Lấy một bài hát theo ID
 // @route   GET /api/songs/:id
 // @access  Public
-const getSongByIdController = async (req, res, next) => {
-    try {
-        const song = await getSongByIdService(req.params.id);
-        res.status(200).json(song);
-    } catch (error) {
-        if (error.message.includes('Không tìm thấy')) {
-            return res.status(404).json({ message: error.message });
-        }
-        // Xử lý lỗi định dạng ID không hợp lệ (CastError)
-        if (error.name === 'CastError') {
-            return res.status(400).json({ message: 'Định dạng ID bài hát không hợp lệ.' });
-        }
-        res.status(500).json({ message: 'Server error: ' + error.message });
-    }
-};
+const getSongByIdController = asyncHandler(async (req, res, next) => {
+    // Logic 404/CastError sẽ được errorMiddleware xử lý
+    const song = await getSongByIdService(req.params.id);
+
+    res.status(200).json(song);
+
+});
 
 // @desc    Tăng lượt nghe của bài hát
 // @route   POST /api/songs/:id/listen
-// @access  Public (Tùy chọn: có thể để Public hoặc Private)
-const incrementPlayCountController = async (req, res, next) => {
-    try {
-        const songId = req.params.id;
+// @access  Public
+const incrementPlayCountController = asyncHandler(async (req, res, next) => {
 
-        const newPlayCount = await incrementPlayCountService(songId);
+    const songId = req.params.id;
 
-        res.status(200).json({
-            message: 'Lượt nghe đã được cập nhật thành công.',
-            playCount: newPlayCount
-        });
+    const newPlayCount = await incrementPlayCountService(songId);
 
-    } catch (error) {
-        if (error.message.includes('Không tìm thấy')) {
-            return res.status(404).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Server error: ' + error.message });
-    }
-};
+    res.status(200).json({
+        message: 'Lượt nghe đã được cập nhật thành công.',
+        playCount: newPlayCount
+    });
+
+});
 
 // @desc    Lấy top N bài hát được nghe nhiều nhất
 // @route   GET /api/songs/top?limit=N
 // @access  Public
-const getTopSongsController = async (req, res, next) => {
-    try {
-        // Lấy tham số limit từ query (mặc định là 10)
-        const limit = parseInt(req.query.limit) || 10;
+const getTopSongsController = asyncHandler(async (req, res, next) => {
 
-        const topSongs = await getTopSongsService(limit);
+    // Lấy tham số limit từ query (mặc định là 10)
+    const limit = parseInt(req.query.limit) || 10;
 
-        res.status(200).json(topSongs);
+    const topSongs = await getTopSongsService(limit);
 
-    } catch (error) {
-        res.status(500).json({ message: 'Server error: ' + error.message });
-    }
-};
+    res.status(200).json(topSongs);
+
+});
 
 export { createSongController, getAllSongsController, deleteSongController, updateSongController, getSongByIdController, incrementPlayCountController, getTopSongsController };

@@ -1,59 +1,54 @@
 // /backend/controllers/authController.js
+
+import asyncHandler from 'express-async-handler';
 import { registerUser, loginUser } from '../services/authService.js';
 import generateToken from '../utils/generateToken.js';
 
-const registerUserController = async (req, res, next) => { // Đổi tên hàm để tránh trùng tên với Service
-    try {
-        const { username, displayName, password } = req.body;
-        
-        if (!username || !displayName || !password) {
-            res.status(400).json({ message: 'Vui lòng điền đầy đủ các trường bắt buộc.' });
-            return;
-        }
+// @desc    Đăng ký người dùng mới
+// @route   POST /api/auth/register
+// @access  Public
+const registerUserController = asyncHandler(async (req, res, next) => {
+    const { username, displayName, password } = req.body;
 
-        // Gọi service
-        const newUser = await registerUser({ username, displayName, password });
-
-        res.status(201).json({
-            message: 'Đăng ký thành công.',
-            user: newUser,
-        });
-
-    } catch (error) {
-        if (error.message.includes('Tên đăng nhập đã tồn tại')) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Server error: ' + error.message });
+    // 1. Xử lý lỗi validation 400
+    if (!username || !displayName || !password) {
+        res.status(400);
+        throw new Error('Vui lòng điền đầy đủ các trường bắt buộc.');
     }
-};
 
-const loginUserController = async (req, res, next) => { // Đổi tên hàm để tránh trùng tên với Service
-    try {
-        const { username, password } = req.body;
+    // Lỗi "Tên đăng nhập đã tồn tại" sẽ được Service throw ra và errorMiddleware bắt
+    const newUser = await registerUser({ username, displayName, password });
 
-        if (!username || !password) {
-            return res.status(400).json({ message: 'Vui lòng cung cấp tên đăng nhập và mật khẩu.' });
-        }
+    res.status(201).json({
+        message: 'Đăng ký thành công.',
+        user: newUser,
+    });
+});
 
-        // Gọi service
-        const user = await loginUser(username, password);
+// @desc    Đăng nhập người dùng
+// @route   POST /api/auth/login
+// @access  Public
+const loginUserController = asyncHandler(async (req, res, next) => {
+    const { username, password } = req.body;
 
-        const token = generateToken(user._id, user.role);
-
-        res.json({
-            _id: user._id,
-            username: user.username,
-            displayName: user.displayName,
-            role: user.role,
-            token, 
-        });
-
-    } catch (error) {
-        if (error.message.includes('không đúng')) {
-            return res.status(401).json({ message: error.message }); 
-        }
-        res.status(500).json({ message: 'Server error: ' + error.message });
+    // 1. Xử lý lỗi validation 400
+    if (!username || !password) {
+        res.status(400);
+        throw new Error('Vui lòng cung cấp tên đăng nhập và mật khẩu.');
     }
-};
+
+    // Lỗi 401 (Thông tin không đúng) sẽ được Service throw ra và errorMiddleware bắt
+    const user = await loginUser(username, password);
+
+    const token = generateToken(user._id, user.role);
+
+    res.json({
+        _id: user._id,
+        username: user.username,
+        displayName: user.displayName,
+        role: user.role,
+        token,
+    });
+});
 
 export { registerUserController, loginUserController };
