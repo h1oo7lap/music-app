@@ -30,6 +30,9 @@ app.get('/', (req, res) => {
     res.send('Music App API is running...');
 });
 
+// Public thư mục uploads để truy cập file audio
+app.use('/uploads', express.static('uploads'));
+
 // Định nghĩa đường dẫn cho Auth Route
 app.use('/api/auth', authRoute);
 
@@ -66,6 +69,6 @@ app.use(notFound);
 app.use(errorHandler);
 
 // app.listen() - Sửa lỗi "clean exit"
-app.listen(PORT, () => {         // "0.0.0.0" là IP address cơ bản (có nghiệm)
+app.listen(PORT, () => {         
     console.log(`🚀 Server running on port ${PORT}`);
 });
