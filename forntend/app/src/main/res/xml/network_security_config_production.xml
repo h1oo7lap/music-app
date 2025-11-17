@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Production version: Only allows specific domains -->
 <network-security-config>
-    <base-config cleartextTrafficPermitted="true">
-        <trust-anchors>
-            <certificates src="system" />
-        </trust-anchors>
-    </base-config>
     <domain-config cleartextTrafficPermitted="true">
+        <!-- For Android Emulator -->
         <domain includeSubdomains="true">10.0.2.2</domain>
+        
+        <!-- For localhost testing -->
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
-        <domain includeSubdomains="true">192.168.0.103</domain>
-        <domain includeSubdomains="true">192.168.1.1</domain>
+        
+        <!-- Add your computer's local IP address here -->
+        <!-- Example: -->
+        <!-- <domain includeSubdomains="true">192.168.x.x</domain> -->
     </domain-config>
 </network-security-config>

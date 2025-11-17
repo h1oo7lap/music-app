@@ -67,6 +67,9 @@ app.use(notFound);
 app.use(errorHandler);
 
 // app.listen() - Sửa lỗi "clean exit"
-app.listen(PORT, () => {         
+// Listen on 0.0.0.0 to accept connections from network devices
+app.listen(PORT, '0.0.0.0', () => {         
     console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📱 Access from device: http://192.168.0.103:${PORT}`);
+    console.log(`💻 Access locally: http://localhost:${PORT}`);
 });

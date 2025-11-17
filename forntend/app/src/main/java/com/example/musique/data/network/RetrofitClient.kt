@@ -6,6 +6,8 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import com.example.musique.utils.Constants
+
 
 object RetrofitClient {
     
@@ -25,12 +27,12 @@ object RetrofitClient {
             val client = OkHttpClient.Builder()
                 .addInterceptor(AuthInterceptor(preferenceManager))
                 .addInterceptor(loggingInterceptor)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(Constants.NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(Constants.NETWORK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .build()
             
             retrofit = Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(Constants.API_BASE_URL)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()

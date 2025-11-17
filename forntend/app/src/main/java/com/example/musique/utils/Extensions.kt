@@ -19,7 +19,7 @@ fun getFullUrl(path: String?): String? {
     return if (path.startsWith("http")) {
         path
     } else {
-        "http://10.0.2.2:5000/$path"
+        "${Constants.MEDIA_BASE_URL}/${path.removePrefix("/")}"
     }
 }
 

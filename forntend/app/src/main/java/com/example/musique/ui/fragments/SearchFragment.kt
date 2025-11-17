@@ -16,6 +16,7 @@ import com.example.musique.player.MusicPlayerManager
 import com.example.musique.ui.adapter.SongAdapter
 import com.example.musique.ui.viewmodel.SongViewModel
 import com.example.musique.ui.viewmodel.ViewModelFactory
+import com.example.musique.utils.Constants
 import com.example.musique.utils.PreferenceManager
 import com.example.musique.utils.Resource
 import kotlinx.coroutines.CoroutineScope
@@ -113,9 +114,9 @@ class SearchFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 searchJob?.cancel()
                 searchJob = CoroutineScope(Dispatchers.Main).launch {
-                    delay(500)
+                    delay(Constants.SEARCH_DEBOUNCE_MS)
                     val keyword = s?.toString()?.trim()
-                    viewModel.getSongs(keyword?.ifEmpty { null }, 1, 20)
+                    viewModel.getSongs(keyword?.ifEmpty { null }, 1, Constants.DEFAULT_PAGE_SIZE)
                 }
             }
             
