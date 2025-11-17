@@ -60,8 +60,6 @@ app.get('/api/admin-data', protect, isAdmin, (req, res) => {
     });
 });
 
-// --- XỬ LÝ LỖI TOÀN CỤC (ĐẶT CUỐI CÙNG) ---
-
 // 1. Middleware bắt 404 cho các route không tồn tại
 app.use(notFound);
 
