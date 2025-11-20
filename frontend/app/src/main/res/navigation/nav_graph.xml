@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment android:id="@+id/homeFragment"    android:name="com.h1oo7.musicapp.ui.fragment.HomeFragment" />
+    <fragment android:id="@+id/searchFragment"  android:name="com.h1oo7.musicapp.ui.fragment.SearchFragment" />
+    <fragment android:id="@+id/libraryFragment" android:name="com.h1oo7.musicapp.ui.fragment.LibraryFragment" />
+    <fragment android:id="@+id/uploadFragment"  android:name="com.h1oo7.musicapp.ui.fragment.UploadFragment" />
+    <fragment android:id="@+id/profileFragment" android:name="com.h1oo7.musicapp.ui.fragment.ProfileFragment" />
+    <fragment android:id="@+id/adminFragment"   android:name="com.h1oo7.musicapp.ui.fragment.AdminFragment" />
+</navigation>

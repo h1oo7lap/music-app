@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#121212"
+    android:padding="16dp">
+
+    <!-- Label Top Songs -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Top Songs"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp" />
+
+    <!-- Top 5 Songs RecyclerView (ngang) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_top_songs"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        android:orientation="horizontal"
+        android:overScrollMode="never" />
+
+    <!-- Label All Songs -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="All Songs"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp" />
+
+    <!-- Danh sách tất cả bài hát (dọc) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_songs"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:overScrollMode="never" />
+
+</LinearLayout>
