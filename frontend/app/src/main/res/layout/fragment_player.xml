@@ -1,51 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:background="#121212"
-    android:padding="32dp">
+    android:background="#121212">
 
-    <!-- Ảnh bìa lớn -->
-    <ImageView
-        android:id="@+id/img_cover_big"
-        android:layout_width="280dp"
-        android:layout_height="280dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/ic_music_note"
-        android:elevation="8dp"
-        android:layout_marginBottom="40dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp">
 
-    <!-- Tiêu đề bài hát -->
-    <TextView
-        android:id="@+id/tv_title_big"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tên bài hát"
-        android:textColor="#FFFFFF"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="8dp"/>
+        <FrameLayout
+            android:id="@+id/disc_container"
+            android:layout_width="340dp"
+            android:layout_height="340dp"
+            android:layout_marginBottom="50dp">
 
-    <!-- Tên nghệ sĩ -->
-    <TextView
-        android:id="@+id/tv_artist_big"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tên nghệ sĩ"
-        android:textColor="#B3B3B3"
-        android:textSize="18sp"
-        android:layout_marginBottom="48dp"/>
+        <!-- ĐĨA XOAY -->
+        <ImageView
+            android:id="@+id/img_disc"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/disc"
+            android:scaleType="centerCrop" />
 
-    <!-- Nút Play/Pause lớn -->
-    <ImageButton
-        android:id="@+id/btn_play_pause_big"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_play_circle_48"
-        android:contentDescription="Play/Pause"
-        android:scaleType="fitCenter"/>
+        <!-- ẢNH BÌA LỒNG VÀO -->
+        <ImageView
+            android:id="@+id/img_cover_big"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:background="@drawable/circle_shape"
+            android:clipToOutline="true"
+            android:elevation="10dp" />
+    </FrameLayout>
 
-</LinearLayout>
+        <!-- Tên bài hát + nghệ sĩ -->
+        <TextView
+            android:id="@+id/tv_title_big"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tên bài hát"
+            android:textColor="#FFFFFF"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tv_artist_big"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tên nghệ sĩ"
+            android:textColor="#B3B3B3"
+            android:textSize="20sp"
+            android:layout_marginBottom="40dp" />
+
+        <!-- Seekbar -->
+        <SeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="#1DB954"
+            android:thumbTint="#1DB954"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Thời gian -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="40dp">
+
+            <TextView
+                android:id="@+id/tv_current_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0:00"
+                android:textColor="#B3B3B3"
+                android:textSize="14sp" />
+
+            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+
+            <TextView
+                android:id="@+id/tv_total_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0:00"
+                android:textColor="#B3B3B3"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- NÚT ĐIỀU KHIỂN – DÙNG ConstraintLayout ĐỂ KHÔNG BỊ TRÀN -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/btn_shuffle"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:src="@drawable/ic_shuffle"
+                android:tint="#BBBBBB"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Ngẫu nhiên"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <ImageButton
+                android:id="@+id/btn_previous"
+                android:layout_width="68dp"
+                android:layout_height="68dp"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_previous"
+                android:tint="#FFFFFF"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/btn_shuffle"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/btn_play_pause_big"
+                android:layout_width="92dp"
+                android:layout_height="92dp"
+                android:src="@drawable/ic_play_circle_92"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <ImageButton
+                android:id="@+id/btn_next"
+                android:layout_width="68dp"
+                android:layout_height="68dp"
+                android:layout_marginEnd="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_next"
+                android:tint="#FFFFFF"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btn_repeat"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/btn_repeat"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Lặp lại"
+                android:src="@drawable/ic_repeat"
+                android:tint="#BBBBBB"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,8 +1,12 @@
 package com.h1oo7.musicapp;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -15,6 +19,21 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private NavController navController;
+
+    private void setupBottomNavigation() {
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+
+        // Ẩn tab Quản trị nếu không phải Admin
+        Menu menu = bottomNav.getMenu();
+        MenuItem adminItem = menu.findItem(R.id.adminFragment);
+
+        if (!SharedPrefManager.getInstance(this).isAdmin()) {
+            adminItem.setVisible(false);
+        }
+
+        NavigationUI.setupWithNavController(bottomNav, navController);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

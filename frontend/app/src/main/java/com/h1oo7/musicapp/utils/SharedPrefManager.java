@@ -1,4 +1,3 @@
-// app/java/com/h1oo7/musicapp/utils/SharedPrefManager.java
 package com.h1oo7.musicapp.utils;
 
 import android.content.Context;
@@ -26,7 +25,6 @@ public class SharedPrefManager {
         return instance;
     }
 
-    // Lưu khi login thành công
     public void saveLogin(String token, String userId, String role) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(KEY_TOKEN, token);
@@ -35,27 +33,30 @@ public class SharedPrefManager {
         editor.apply();
     }
 
-    // Lấy token
     public String getToken() {
         return sharedPreferences.getString(KEY_TOKEN, null);
     }
 
-    // Lấy userId
     public String getUserId() {
         return sharedPreferences.getString(KEY_USER_ID, null);
     }
 
-    // Lấy role (admin hoặc user) ← quan trọng nhất
     public String getUserRole() {
-        return sharedPreferences.getString(KEY_ROLE, "user"); // default là user
+        return sharedPreferences.getString
+
+                (KEY_ROLE, "user");
     }
 
-    // Kiểm tra đã login chưa
     public boolean isLoggedIn() {
         return getToken() != null;
     }
 
-    // Đăng xuất
+    // HÀM MỚI – SIÊU QUAN TRỌNG!
+    public boolean isAdmin() {
+        String role = getUserRole();
+        return role != null && role.equalsIgnoreCase("admin");
+    }
+
     public void logout() {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();

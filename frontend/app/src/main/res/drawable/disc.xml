@@ -1,0 +1,23 @@
+<!-- res/drawable/disc.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="320dp"
+    android:viewportWidth="320"
+    android:viewportHeight="320">
+
+    <path
+        android:fillColor="#000000"
+        android:pathData="M160,160m-155,0a155,155 0,1 1,310 0a155,155 0,1 1,-310 0" />
+
+    <path
+        android:fillColor="#1E1E1E"
+        android:pathData="M160,160m-145,0a145,145 0,1 1,290 0a145,145 0,1 1,-290 0" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M160,160m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0" />
+
+    <path
+        android:fillColor="#1DB954"
+        android:pathData="M160,160m-20,0a20,20 0,1 1,40 0a20,20 0,1 1,-40 0" />
+</vector>
