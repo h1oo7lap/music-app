@@ -20,4 +20,16 @@
     <action
         android:id="@+id/action_global_playerFragment"
         app:destination="@id/playerFragment" />
+    <!-- Fragment thể loại + bài hát -->
+    <fragment
+        android:id="@+id/genreSongsFragment"
+        android:name="com.h1oo7.musicapp.ui.fragment.GenreSongsFragment"
+        android:label="{genreName}">
+        <argument android:name="genreId" app:argType="string" />
+        <argument android:name="genreName" app:argType="string" />
+    </fragment>
+
+    <action
+        android:id="@+id/action_homeFragment_to_genreSongsFragment"
+        app:destination="@id/genreSongsFragment" />
 </navigation>

@@ -10,15 +10,19 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.h1oo7.musicapp.R;
+import com.h1oo7.musicapp.model.Genre;
 import com.h1oo7.musicapp.model.Song;
 import com.h1oo7.musicapp.model.SongResponse;
 import com.h1oo7.musicapp.network.ApiService;
 import com.h1oo7.musicapp.network.RetrofitClient;
+import com.h1oo7.musicapp.ui.adapter.GenreAdapter;
 import com.h1oo7.musicapp.ui.adapter.SongAdapter;
 import com.h1oo7.musicapp.utils.SharedPrefManager;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -27,6 +31,9 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerTopSongs;
     private SongAdapter adapter;
     private SongAdapter topAdapter;
+    // Thêm biến
+    private RecyclerView recyclerGenres;
+    private GenreAdapter genreAdapter;
 
     private int topSongPosition = 0;
     private Handler autoScrollHandler = new Handler();
@@ -62,7 +69,13 @@ public class HomeFragment extends Fragment {
         topAdapter = new SongAdapter();
         recyclerTopSongs.setAdapter(topAdapter);
 
+        recyclerGenres = view.findViewById(R.id.recycler_genres);
+        recyclerGenres.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        genreAdapter = new GenreAdapter(this); // this = HomeFragment
+        recyclerGenres.setAdapter(genreAdapter);
+
         loadTopSongs();
+        loadGenres();
         loadAllSongs();
 
         return view;
@@ -82,7 +95,8 @@ public class HomeFragment extends Fragment {
     private void loadAllSongs() {
         ApiService api = RetrofitClient.getClient().create(ApiService.class);
 
-        api.getAllSongs().enqueue(new Callback<SongResponse>() {
+        // Lấy 50 bài đầu tiên (page 1, limit 50) – đủ dùng cho Home
+        api.getAllSongs(1, 50, "").enqueue(new Callback<SongResponse>() {
             @Override
             public void onResponse(Call<SongResponse> call, Response<SongResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -98,15 +112,33 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void loadGenres() {
+        ApiService api = RetrofitClient.getClient().create(ApiService.class);
+
+        api.getAllGenres().enqueue(new Callback<List<Genre>>() {
+            @Override
+            public void onResponse(Call<List<Genre>> call, Response<List<Genre>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    genreAdapter.setGenres(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Genre>> call, Throwable t) {
+                t.printStackTrace();
+                // Có thể thêm Toast lỗi nếu muốn
+            }
+        });
+    }
     private void loadTopSongs() {
         ApiService api = RetrofitClient.getClient().create(ApiService.class);
-        api.getTopSongs().enqueue(new Callback<List<Song>>() {
+
+        // Lấy đúng 5 bài top
+        api.getTopSongs(5).enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // Giới hạn top 5 bài
-                    List<Song> top5 = response.body().size() > 5 ? response.body().subList(0,5) : response.body();
-                    topAdapter.setSongs(top5);
+                    topAdapter.setSongs(response.body());
                     topAdapter.notifyDataSetChanged();
                 }
             }
@@ -117,5 +149,4 @@ public class HomeFragment extends Fragment {
             }
         });
     }
-
 }

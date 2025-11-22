@@ -1,8 +1,12 @@
 // app/java/com/h1oo7/musicapp/model/Genre.java
 package com.h1oo7.musicapp.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Genre {
-    public String _id;
+    @SerializedName("_id")
+    private String id;  // Đổi thành "id" cho chuẩn Java
+
     public String name;
     public String slug;
 
@@ -13,12 +17,12 @@ public class Genre {
         return name; // để sau này hiển thị "Pop", "Hip Hop"...
     }
 
-    public String get_id() {
-        return _id;
+    public String getId() {
+        return id;
     }
 
-    public void set_id(String _id) {
-        this._id = _id;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
