@@ -10,4 +10,14 @@
     <fragment android:id="@+id/uploadFragment"  android:name="com.h1oo7.musicapp.ui.fragment.UploadFragment" />
     <fragment android:id="@+id/profileFragment" android:name="com.h1oo7.musicapp.ui.fragment.ProfileFragment" />
     <fragment android:id="@+id/adminFragment"   android:name="com.h1oo7.musicapp.ui.fragment.AdminFragment" />
+    <!-- Player full màn hình -->
+    <fragment
+        android:id="@+id/playerFragment"
+        android:name="com.h1oo7.musicapp.ui.fragment.PlayerFragment"
+        android:label="Now Playing" />
+
+    <!-- Action global – chỉ cần dòng này là đủ -->
+    <action
+        android:id="@+id/action_global_playerFragment"
+        app:destination="@id/playerFragment" />
 </navigation>

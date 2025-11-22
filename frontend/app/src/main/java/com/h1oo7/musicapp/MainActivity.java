@@ -7,6 +7,8 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.h1oo7.musicapp.databinding.ActivityMainBinding;
+import com.h1oo7.musicapp.player.PlayerManager;
+import com.h1oo7.musicapp.ui.fragment.MiniPlayerFragment;
 import com.h1oo7.musicapp.utils.SharedPrefManager;
 
 public class MainActivity extends AppCompatActivity {
@@ -19,6 +21,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Init Player
+        PlayerManager.getInstance().init(this);
+
+        // KHÔNG ADD MINI PLAYER Ở ĐÂY NỮA
 
         // Setup Navigation
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
@@ -33,5 +40,11 @@ public class MainActivity extends AppCompatActivity {
         if (!"admin".equals(role)) {
             bottomNav.getMenu().removeItem(R.id.adminFragment);
         }
+    }
+
+    public void showMiniPlayer() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.mini_player_container, new MiniPlayerFragment())
+                .commitAllowingStateLoss();
     }
 }
