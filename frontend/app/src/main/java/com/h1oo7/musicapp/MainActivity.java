@@ -33,7 +33,19 @@ public class MainActivity extends AppCompatActivity {
         navController = navHostFragment.getNavController();
 
         BottomNavigationView bottomNav = binding.bottomNavigation;
-        NavigationUI.setupWithNavController(bottomNav, navController);
+
+        // --- Thay đổi: lắng nghe click thủ công ---
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.homeFragment) {
+                // Luôn navigate về HomeFragment
+                navController.navigate(R.id.homeFragment);
+                return true;
+            } else {
+                // Các nút khác vẫn giữ hành vi cũ
+                return NavigationUI.onNavDestinationSelected(item, navController);
+            }
+        });
 
         // ẨN/HIỆN TAB QUẢN TRỊ THEO ROLE
         String role = SharedPrefManager.getInstance(this).getUserRole();
@@ -42,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Hàm hiển thị MiniPlayer
     public void showMiniPlayer() {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.mini_player_container, new MiniPlayerFragment())

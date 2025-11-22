@@ -3,6 +3,7 @@ package com.h1oo7.musicapp.player;
 import android.content.Context;
 import android.net.Uri;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
 import com.h1oo7.musicapp.model.Song;
 import com.h1oo7.musicapp.utils.Constants;
@@ -27,6 +28,22 @@ public class PlayerManager {
     public void init(Context context) {
         if (exoPlayer == null) {
             exoPlayer = new ExoPlayer.Builder(context).build();
+
+            // ←←← ĐOẠN NÀY LÀ "THẦN DƯỢC" CUỐI CÙNG ←←←
+            exoPlayer.addListener(new Player.Listener() {
+                @Override
+                public void onIsPlayingChanged(boolean isPlaying) {
+                    notifyListeners(); // Đảm bảo UI cập nhật đúng trạng thái thực
+                }
+
+                @Override
+                public void onPlaybackStateChanged(int state) {
+                    if (state == Player.STATE_READY) {
+                        notifyListeners();
+                    }
+                }
+            });
+            // ←←← KẾT THÚC ←←←
         }
     }
 
@@ -41,10 +58,7 @@ public class PlayerManager {
         exoPlayer.prepare();
         exoPlayer.play();
 
-        notifyListeners();
-
-        // Tăng lượt nghe
-        // (gọi API ở đây hoặc ở Adapter đều được, mình để cả 2 chỗ cho chắc)
+        notifyListeners(); // ← Cập nhật UI ngay khi bắt đầu phát
     }
 
     public ExoPlayer getExoPlayer() { return exoPlayer; }
@@ -58,7 +72,7 @@ public class PlayerManager {
         } else {
             exoPlayer.play();
         }
-        notifyListeners();
+        notifyListeners(); // ← QUAN TRỌNG: Phải có dòng này!
     }
 
     public void addListener(Runnable listener) {
@@ -71,8 +85,8 @@ public class PlayerManager {
         listeners.remove(listener);
     }
 
-    private void notifyListeners() {
-        for (Runnable listener : listeners) {
+    public void notifyListeners() {
+        for (Runnable listener : new ArrayList<>(listeners)) { // tránh ConcurrentModification
             listener.run();
         }
     }
@@ -82,6 +96,7 @@ public class PlayerManager {
             exoPlayer.release();
             exoPlayer = null;
         }
+        listeners.clear();
         instance = null;
     }
 }
