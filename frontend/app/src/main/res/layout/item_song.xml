@@ -63,7 +63,7 @@
 
         <!-- Nút thêm Playlist -->
         <ImageView
-            android:id="@+id/btn_add_playlist"
+            android:id="@+id/btn_add_to_playlist"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:src="@drawable/ic_playlist_add"

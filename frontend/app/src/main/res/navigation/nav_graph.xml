@@ -31,4 +31,17 @@
     <action
         android:id="@+id/action_homeFragment_to_genreSongsFragment"
         app:destination="@id/genreSongsFragment" />
+
+    <fragment
+        android:id="@+id/playlistDetailFragment"
+        android:name="com.h1oo7.musicapp.ui.fragment.PlaylistDetailFragment"
+        android:label="{playlist_name}">
+        <argument android:name="playlist_id" app:argType="string" />
+        <argument android:name="playlist_name" app:argType="string" />
+    </fragment>
+
+    <action
+        android:id="@+id/action_libraryFragment_to_playlistDetailFragment"
+        app:destination="@id/playlistDetailFragment" />
+
 </navigation>

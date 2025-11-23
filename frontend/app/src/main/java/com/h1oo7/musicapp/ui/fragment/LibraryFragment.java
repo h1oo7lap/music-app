@@ -30,7 +30,8 @@ public class LibraryFragment extends Fragment {
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
 
-        viewPager.setAdapter(new LibraryPagerAdapter(this));
+        LibraryPagerAdapter adapter = new LibraryPagerAdapter(this);
+        viewPager.setAdapter(adapter);
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             if (position == 0) tab.setText("Playlist");

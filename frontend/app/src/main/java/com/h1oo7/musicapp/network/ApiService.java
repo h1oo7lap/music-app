@@ -2,12 +2,18 @@
 package com.h1oo7.musicapp.network;
 
 import com.h1oo7.musicapp.model.*;
+import com.h1oo7.musicapp.model.request.AddRemoveSongRequest;
+import com.h1oo7.musicapp.model.request.CreatePlaylistRequest;
+import com.h1oo7.musicapp.model.request.ToggleFavoriteRequest;
+import com.h1oo7.musicapp.model.response.FavoriteResponse;
+import com.h1oo7.musicapp.model.response.GenericResponse;
+import com.h1oo7.musicapp.model.response.PlaylistResponse;
+
 import retrofit2.Call;
 import retrofit2.http.*;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import java.util.List;
-import java.util.Map;
 
 public interface ApiService {
 
@@ -91,34 +97,28 @@ public interface ApiService {
     Call<Void> deleteGenre(@Path("id") String genreId);
 
     // ------------------------------------------------------------------
-    // Playlist
-    // Playlist
-    @GET("api/playlists/my")
-    Call<List<Playlist>> getMyPlaylists(@Header("Authorization") String token);
-
+    // === PLAYLIST ===
     @POST("api/playlists")
-    Call<Playlist> createPlaylist(
-            @Header("Authorization") String token,
-            @Body Map<String, Object> body // { "name": "Playlist 1", "isPublic": true }
-    );
+    Call<PlaylistResponse> createPlaylist(@Body CreatePlaylistRequest request);
 
-    @DELETE("api/playlists/{id}")
-    Call<Void> deletePlaylist(
-            @Header("Authorization") String token,
-            @Path("id") String playlistId
-    );
+    @GET("api/playlists/my")
+    Call<List<Playlist>> getMyPlaylists();
+
+    // XÓA PLAYLIST – CHỈ TRẢ VỀ MESSAGE → DÙNG Void HOẶC GenericResponse
+    @HTTP(method = "DELETE", path = "api/playlists/{id}", hasBody = true)
+    Call<GenericResponse> deletePlaylist(@Path("id") String playlistId);
 
     @PUT("api/playlists/add")
-    Call<Playlist> addSongToPlaylist(
-            @Header("Authorization") String token,
-            @Body Map<String, String> body // { "playlistId": "...", "songId": "..." }
-    );
+    Call<PlaylistResponse> addSongToPlaylist(@Body AddRemoveSongRequest request);
 
     @PUT("api/playlists/remove")
-    Call<Playlist> removeSongFromPlaylist(
-            @Header("Authorization") String token,
-            @Body Map<String, String> body
-    );
+    Call<PlaylistResponse> removeSongFromPlaylist(@Body AddRemoveSongRequest request);
 
+    // === YÊU THÍCH ===
+    @PUT("api/users/favorites")
+    Call<FavoriteResponse> toggleFavorite(@Body ToggleFavoriteRequest request);
+
+    @GET("api/user/favorites")
+    Call<List<Song>> getFavoriteSongs();
 
 }

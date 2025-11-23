@@ -3,6 +3,8 @@ package com.h1oo7.musicapp.ui.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,35 +17,84 @@ import java.util.List;
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
 
     private List<Playlist> playlists = new ArrayList<>();
-    private OnItemClickListener listener;
+    private RecyclerView recyclerView; // Thêm biến này
 
-    public interface OnItemClickListener {
-        void onClick(Playlist playlist);
+    public PlaylistAdapter(RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
+    public PlaylistAdapter() {
+        this.recyclerView = null;
     }
 
-    public void setPlaylists(List<Playlist> data) {
-        this.playlists = data != null ? data : new ArrayList<>();
+    public void addPlaylist(Playlist playlist) {
+        playlists.add(0, playlist);
+        notifyItemInserted(0);
+        if (recyclerView != null) {
+            recyclerView.smoothScrollToPosition(0);
+        }
+    }
+
+    public void setPlaylists(List<Playlist> newPlaylists) {
+        playlists = new ArrayList<>(newPlaylists);
         notifyDataSetChanged();
+    }
+
+    public void removePlaylist(Playlist playlist) {
+        int position = playlists.indexOf(playlist);
+        if (position != -1) {
+            playlists.remove(position);
+            notifyItemRemoved(position);
+        }
     }
 
     @NonNull
     @Override
-    public PlaylistAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_playlist, parent, false);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_playlist, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull PlaylistAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Playlist playlist = playlists.get(position);
-        holder.tvTitle.setText(playlist.getName());
+        holder.tvName.setText(playlist.getName());
+        holder.tvCount.setText(playlist.getSongCount() + " bài hát");
+
+        // 1. BẤM VÀO TOÀN BỘ ITEM → CHUYỂN QUA CHI TIẾT PLAYLIST
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onClick(playlist);
+            if (clickListener != null) {
+                clickListener.onPlaylistClick(playlist);
+            }
         });
+
+        // 2. BẤM VÀO NÚT 3 CHẤM → HIỆN MENU XÓA
+        holder.btnMenu.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(v.getContext(), holder.btnMenu);
+            popup.inflate(R.menu.menu_playlist_item);
+            popup.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.action_delete) {
+                    if (onDeleteClickListener != null) {
+                        onDeleteClickListener.onDelete(playlist);
+                    }
+                    return true;
+                }
+                return false;
+            });
+            popup.show();
+        });
+    }
+
+    // Interface để xử lý xóa
+    public interface OnDeleteClickListener {
+        void onDelete(Playlist playlist);
+    }
+
+    private OnDeleteClickListener onDeleteClickListener;
+
+    public void setOnDeleteClickListener(OnDeleteClickListener listener) {
+        this.onDeleteClickListener = listener;
     }
 
     @Override
@@ -52,10 +103,27 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle;
+        TextView tvName, tvCount;
+        ImageView imgCover;
+        ImageView btnMenu; // THÊM DÒNG NÀY!!!
+
         ViewHolder(View itemView) {
             super(itemView);
-            tvTitle = itemView.findViewById(R.id.tv_playlist_name);
+            tvName = itemView.findViewById(R.id.tv_playlist_name);
+            tvCount = itemView.findViewById(R.id.tv_song_count);
+            imgCover = itemView.findViewById(R.id.img_playlist_cover);
+            btnMenu = itemView.findViewById(R.id.btn_menu); // THÊM DÒNG NÀY!!!
         }
     }
+
+    public void setOnPlaylistClickListener(OnPlaylistClickListener listener) {
+        this.clickListener = listener;
+    }
+
+    public interface OnPlaylistClickListener {
+        void onPlaylistClick(Playlist playlist);
+    }
+
+    private OnPlaylistClickListener clickListener;
+
 }
