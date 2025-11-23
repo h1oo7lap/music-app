@@ -4,10 +4,14 @@ package com.h1oo7.musicapp.network;
 import com.h1oo7.musicapp.model.*;
 import com.h1oo7.musicapp.model.request.AddRemoveSongRequest;
 import com.h1oo7.musicapp.model.request.CreatePlaylistRequest;
+import com.h1oo7.musicapp.model.request.RegisterRequest;
 import com.h1oo7.musicapp.model.request.ToggleFavoriteRequest;
 import com.h1oo7.musicapp.model.response.FavoriteResponse;
 import com.h1oo7.musicapp.model.response.GenericResponse;
+import com.h1oo7.musicapp.model.response.LoginResponse;
 import com.h1oo7.musicapp.model.response.PlaylistResponse;
+import com.h1oo7.musicapp.model.response.RegisterResponse;
+import com.h1oo7.musicapp.model.response.SongResponse;
 
 import retrofit2.Call;
 import retrofit2.http.*;

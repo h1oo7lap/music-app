@@ -1,5 +1,5 @@
 // app/java/com/h1oo7/musicapp/model/LoginResponse.java
-package com.h1oo7.musicapp.model;
+package com.h1oo7.musicapp.model.response;
 
 public class LoginResponse {
     public String _id;

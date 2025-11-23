@@ -6,8 +6,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.textfield.TextInputEditText;
 import com.h1oo7.musicapp.R;
-import com.h1oo7.musicapp.model.LoginResponse;
-import com.h1oo7.musicapp.model.RegisterRequest;
+import com.h1oo7.musicapp.model.response.LoginResponse;
+import com.h1oo7.musicapp.model.request.RegisterRequest;
 import com.h1oo7.musicapp.network.ApiService;
 import com.h1oo7.musicapp.network.RetrofitClient;
 import com.h1oo7.musicapp.utils.SharedPrefManager;
@@ -69,7 +69,12 @@ public class LoginActivity extends AppCompatActivity {
                     SharedPrefManager.getInstance(LoginActivity.this)
                             .saveLogin(res.token, res._id, res.role);
 
+
+
                     Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+
+                    SharedPrefManager.getInstance(LoginActivity.this)
+                            .saveLogin(res.token, res._id, res.role, res.username, res.displayName);
 
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();

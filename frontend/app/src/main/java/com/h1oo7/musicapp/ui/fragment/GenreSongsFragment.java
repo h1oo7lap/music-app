@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.h1oo7.musicapp.R;
 import com.h1oo7.musicapp.model.Song;
-import com.h1oo7.musicapp.model.SongResponse;
+import com.h1oo7.musicapp.model.response.SongResponse;
 import com.h1oo7.musicapp.network.ApiService;
 import com.h1oo7.musicapp.network.RetrofitClient;
 import com.h1oo7.musicapp.ui.adapter.SongAdapter;

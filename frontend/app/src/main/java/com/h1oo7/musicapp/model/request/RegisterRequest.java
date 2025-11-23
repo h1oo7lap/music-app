@@ -1,5 +1,5 @@
 // app/java/com/h1oo7/musicapp/model/RegisterRequest.java
-package com.h1oo7.musicapp.model;
+package com.h1oo7.musicapp.model.request;
 
 public class RegisterRequest {
     public String username;

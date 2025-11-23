@@ -8,8 +8,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.h1oo7.musicapp.R;
-import com.h1oo7.musicapp.model.RegisterRequest;
-import com.h1oo7.musicapp.model.RegisterResponse;
+import com.h1oo7.musicapp.model.request.RegisterRequest;
+import com.h1oo7.musicapp.model.response.RegisterResponse;
 import com.h1oo7.musicapp.model.User;          // ← THÊM DÒNG NÀY!!!
 import com.h1oo7.musicapp.network.ApiService;
 import com.h1oo7.musicapp.network.RetrofitClient;
@@ -56,7 +56,6 @@ public class RegisterActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(RegisterActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
 
-                    // ← ĐÃ SỬA ĐÚNG 100%
                     User registeredUser = response.body().getUser();
                     SharedPrefManager.getInstance(RegisterActivity.this)
                             .saveLogin("temp_token_after_register",

@@ -1,7 +1,8 @@
 // File: app/java/com/h1oo7/musicapp/model/RegisterResponse.java
-package com.h1oo7.musicapp.model;
+package com.h1oo7.musicapp.model.response;
 
 import com.google.gson.annotations.SerializedName;
+import com.h1oo7.musicapp.model.User;
 
 public class RegisterResponse {
 

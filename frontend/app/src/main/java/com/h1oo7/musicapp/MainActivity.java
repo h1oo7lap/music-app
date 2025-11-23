@@ -76,6 +76,20 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
 
+            if (id == R.id.profileFragment) {
+                // Reset ProfileFragment
+                navController.popBackStack(R.id.profileFragment, true);
+                navController.navigate(R.id.profileFragment);
+                return true;
+            }
+
+            if (id == R.id.adminFragment) {
+                // Reset AdminFragment
+                navController.popBackStack(R.id.adminFragment, true);
+                navController.navigate(R.id.adminFragment);
+                return true;
+            }
+
             // Các tab khác giữ behavior mặc định
             return NavigationUI.onNavDestinationSelected(item, navController);
         });

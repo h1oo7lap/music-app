@@ -33,6 +33,25 @@ public class SharedPrefManager {
         editor.apply();
     }
 
+    public String getDisplayName() {
+        return sharedPreferences.getString("display_name", null);
+    }
+
+    public String getUsername() {
+        return sharedPreferences.getString("username", null);
+    }
+
+    // Trong saveLogin() – lưu thêm
+    public void saveLogin(String token, String userId, String role, String username, String displayName) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(KEY_TOKEN, token);
+        editor.putString(KEY_USER_ID, userId);
+        editor.putString(KEY_ROLE, role);
+        editor.putString("username", username);
+        editor.putString("display_name", displayName);
+        editor.apply();
+    }
+
     public String getToken() {
         return sharedPreferences.getString(KEY_TOKEN, null);
     }

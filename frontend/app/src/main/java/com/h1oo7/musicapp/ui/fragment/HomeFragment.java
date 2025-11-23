@@ -12,17 +12,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.h1oo7.musicapp.R;
 import com.h1oo7.musicapp.model.Genre;
 import com.h1oo7.musicapp.model.Song;
-import com.h1oo7.musicapp.model.SongResponse;
+import com.h1oo7.musicapp.model.response.SongResponse;
 import com.h1oo7.musicapp.network.ApiService;
 import com.h1oo7.musicapp.network.RetrofitClient;
 import com.h1oo7.musicapp.ui.adapter.GenreAdapter;
 import com.h1oo7.musicapp.ui.adapter.SongAdapter;
-import com.h1oo7.musicapp.utils.SharedPrefManager;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
