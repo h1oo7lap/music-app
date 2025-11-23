@@ -25,16 +25,18 @@ const storage = multer.diskStorage({
 // Định nghĩa hàm lọc file (chỉ cho phép MP3 và JPEG/PNG)
 const fileFilter = (req, file, cb) => {
     if (file.fieldname === 'songFile') {
-        if (file.mimetype === 'audio/mpeg') {
+        // Chấp nhận audio/mpeg hoặc các loại audio khác
+        if (file.mimetype.startsWith('audio/')) {
             cb(null, true);
         } else {
-            cb(null, false); // Từ chối các file nhạc không phải MP3
+            cb(null, false); // Từ chối các file không phải audio
         }
     } else if (file.fieldname === 'albumImage') {
-        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+        // Chấp nhận image/jpeg, image/png, hoặc các loại image khác
+        if (file.mimetype.startsWith('image/')) {
             cb(null, true);
         } else {
-            cb(null, false); // Từ chối các file ảnh không phải JPEG/PNG
+            cb(null, false); // Từ chối các file không phải image
         }
     } else {
         cb(null, false);

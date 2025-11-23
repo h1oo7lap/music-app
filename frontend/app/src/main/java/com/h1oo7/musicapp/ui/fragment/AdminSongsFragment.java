@@ -93,6 +93,10 @@ public class AdminSongsFragment extends Fragment {
     }
 
     private void showUploadDialog(@Nullable Song songToEdit) {
+        // Reset URIs when opening dialog to avoid using stale files
+        songUri = null;
+        imageUri = null;
+
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_song_info, null);
         builder.setView(dialogView);
@@ -158,18 +162,21 @@ public class AdminSongsFragment extends Fragment {
     }
 
     private void uploadSong(String title, String artist, String genreId) {
+        // Validate that songFile is selected (required by backend)
+        if (songUri == null) {
+            Toast.makeText(requireContext(), "Vui lòng chọn file nhạc", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         try {
-            MultipartBody.Part songFile = null;
+            // Sử dụng MIME type chính xác: audio/mpeg cho MP3
+            MultipartBody.Part songFile = MultipartBody.Part.createFormData("songFile", "song.mp3",
+                    RequestBody.create(readBytesFromUri(songUri), MediaType.parse("audio/mpeg")));
+
             MultipartBody.Part albumImage = null;
-
-            if (songUri != null) {
-                songFile = MultipartBody.Part.createFormData("songFile", "song.mp3",
-                        RequestBody.create(readBytesFromUri(songUri), MediaType.parse("audio/*")));
-            }
-
             if (imageUri != null) {
                 albumImage = MultipartBody.Part.createFormData("albumImage", "cover.jpg",
-                        RequestBody.create(readBytesFromUri(imageUri), MediaType.parse("image/*")));
+                        RequestBody.create(readBytesFromUri(imageUri), MediaType.parse("image/jpeg")));
             }
 
             RequestBody titlePart = RequestBody.create(title, MediaType.parse("text/plain"));
@@ -185,29 +192,46 @@ public class AdminSongsFragment extends Fragment {
                                 Toast.makeText(requireContext(), "Upload thành công!", Toast.LENGTH_SHORT).show();
                                 loadAllSongs();
                             } else {
-                                Toast.makeText(requireContext(), "Upload thất bại!", Toast.LENGTH_SHORT).show();
+                                // Log chi tiết lỗi từ server
+                                String errorMsg = "Upload thất bại! Code: " + response.code();
+                                try {
+                                    if (response.errorBody() != null) {
+                                        errorMsg += "\n" + response.errorBody().string();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show();
                             }
                         }
 
                         @Override
                         public void onFailure(Call<Song> call, Throwable t) {
-                            Toast.makeText(requireContext(), "Lỗi upload", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                            t.printStackTrace();
                         }
                     });
         } catch (Exception e) {
             e.printStackTrace();
+            Toast.makeText(requireContext(), "Lỗi đọc file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
     private void updateSong(String songId, String title, String artist, String genreId) {
         try {
-            MultipartBody.Part songFile = songUri != null ?
-                    MultipartBody.Part.createFormData("songFile", "song.mp3",
-                            RequestBody.create(readBytesFromUri(songUri), MediaType.parse("audio/*"))) : null;
+            // Optional: Update song file if selected
+            MultipartBody.Part songFile = null;
+            if (songUri != null) {
+                songFile = MultipartBody.Part.createFormData("songFile", "song.mp3",
+                        RequestBody.create(readBytesFromUri(songUri), MediaType.parse("audio/mpeg")));
+            }
 
-            MultipartBody.Part albumImage = imageUri != null ?
-                    MultipartBody.Part.createFormData("albumImage", "cover.jpg",
-                            RequestBody.create(readBytesFromUri(imageUri), MediaType.parse("image/*"))) : null;
+            // Optional: Update album image if selected
+            MultipartBody.Part albumImage = null;
+            if (imageUri != null) {
+                albumImage = MultipartBody.Part.createFormData("albumImage", "cover.jpg",
+                        RequestBody.create(readBytesFromUri(imageUri), MediaType.parse("image/jpeg")));
+            }
 
             RequestBody titlePart = RequestBody.create(title, MediaType.parse("text/plain"));
             RequestBody artistPart = RequestBody.create(artist, MediaType.parse("text/plain"));
@@ -222,17 +246,28 @@ public class AdminSongsFragment extends Fragment {
                                 Toast.makeText(requireContext(), "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
                                 loadAllSongs();
                             } else {
-                                Toast.makeText(requireContext(), "Cập nhật thất bại!", Toast.LENGTH_SHORT).show();
+                                // Log chi tiết lỗi từ server
+                                String errorMsg = "Cập nhật thất bại! Code: " + response.code();
+                                try {
+                                    if (response.errorBody() != null) {
+                                        errorMsg += "\n" + response.errorBody().string();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show();
                             }
                         }
 
                         @Override
                         public void onFailure(Call<Song> call, Throwable t) {
-                            Toast.makeText(requireContext(), "Lỗi cập nhật", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                            t.printStackTrace();
                         }
                     });
         } catch (Exception e) {
             e.printStackTrace();
+            Toast.makeText(requireContext(), "Lỗi đọc file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 

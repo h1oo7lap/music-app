@@ -57,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0 lượt nghe"
-                android:textColor="#666666"
+                android:textColor="#FFFFFF"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -85,7 +85,7 @@
             android:clickable="true"
             android:focusable="true"
             android:visibility="gone"
-            app:tint="#FF6B6B" />
+            app:tint="#FFFFFF" />
 
         <!-- Nút favourite -->
         <ImageView

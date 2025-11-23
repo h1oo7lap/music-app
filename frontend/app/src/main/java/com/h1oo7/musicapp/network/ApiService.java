@@ -1,6 +1,8 @@
 // app/java/com/h1oo7/musicapp/network/ApiService.java
 package com.h1oo7.musicapp.network;
 
+import androidx.annotation.Nullable;
+
 import com.h1oo7.musicapp.model.*;
 import com.h1oo7.musicapp.model.request.AddRemoveSongRequest;
 import com.h1oo7.musicapp.model.request.CreatePlaylistRequest;
@@ -58,7 +60,7 @@ public interface ApiService {
             @Part("artist") RequestBody artist,
             @Part("genre") RequestBody genre,
             @Part MultipartBody.Part songFile,
-            @Part MultipartBody.Part albumImage
+            @Nullable @Part MultipartBody.Part albumImage
     );
 
     @Multipart
@@ -68,8 +70,8 @@ public interface ApiService {
             @Part("title") RequestBody title,
             @Part("artist") RequestBody artist,
             @Part("genre") RequestBody genre,
-            @Part MultipartBody.Part songFile,
-            @Part MultipartBody.Part albumImage
+            @Nullable @Part MultipartBody.Part songFile,
+            @Nullable @Part MultipartBody.Part albumImage
     );
 
 

@@ -30,7 +30,13 @@ public class RetrofitClient {
                         if (token != null) {
                             builder.addHeader("Authorization", "Bearer " + token);
                         }
-                        builder.addHeader("Content-Type", "application/json");
+                        // KHÔNG thêm Content-Type cho multipart requests
+                        // Retrofit sẽ tự động set đúng Content-Type: multipart/form-data
+                        if (original.body() == null || 
+                            original.body().contentType() == null || 
+                            !original.body().contentType().toString().contains("multipart")) {
+                            builder.addHeader("Content-Type", "application/json");
+                        }
 
                         return chain.proceed(builder.build());
                     })
