@@ -19,7 +19,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.h1oo7.musicapp.R;
 import com.h1oo7.musicapp.model.Song;
-import com.h1oo7.musicapp.player.PlayerManager;
+import com.h1oo7.musicapp.manager.PlayerManager;
 import com.h1oo7.musicapp.utils.Constants;
 
 //public class PlayerFragment extends Fragment {

@@ -11,7 +11,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.h1oo7.musicapp.databinding.ActivityMainBinding;
-import com.h1oo7.musicapp.player.PlayerManager;
+import com.h1oo7.musicapp.manager.PlayerManager;
 import com.h1oo7.musicapp.ui.fragment.MiniPlayerFragment;
 import com.h1oo7.musicapp.utils.SharedPrefManager;
 

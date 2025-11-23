@@ -118,7 +118,7 @@ public interface ApiService {
     @PUT("api/users/favorites")
     Call<FavoriteResponse> toggleFavorite(@Body ToggleFavoriteRequest request);
 
-    @GET("api/user/favorites")
+    @GET("api/users/favorites")
     Call<List<Song>> getFavoriteSongs();
 
 }

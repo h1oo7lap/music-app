@@ -20,7 +20,7 @@ import com.h1oo7.musicapp.model.Playlist;
 import com.h1oo7.musicapp.model.Song;
 import com.h1oo7.musicapp.network.ApiService;
 import com.h1oo7.musicapp.network.RetrofitClient;
-import com.h1oo7.musicapp.player.PlayerManager;
+import com.h1oo7.musicapp.manager.PlayerManager;
 import com.h1oo7.musicapp.ui.adapter.SongAdapter;
 
 import java.util.ArrayList;

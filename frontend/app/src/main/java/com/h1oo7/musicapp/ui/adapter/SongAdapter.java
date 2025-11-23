@@ -20,11 +20,12 @@ import com.h1oo7.musicapp.R;
 import com.h1oo7.musicapp.model.Playlist;
 import com.h1oo7.musicapp.model.Song;
 import com.h1oo7.musicapp.model.request.AddRemoveSongRequest;
+import com.h1oo7.musicapp.model.request.ToggleFavoriteRequest;
+import com.h1oo7.musicapp.model.response.FavoriteResponse;
 import com.h1oo7.musicapp.model.response.PlaylistResponse;
 import com.h1oo7.musicapp.network.ApiService;
 import com.h1oo7.musicapp.network.RetrofitClient;
-import com.h1oo7.musicapp.player.PlayerManager;
-import com.h1oo7.musicapp.ui.fragment.PlaylistDetailFragment; // THÊM DÒNG NÀY!!!
+import com.h1oo7.musicapp.manager.PlayerManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,15 +37,51 @@ import retrofit2.Response;
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder> {
 
     private final List<Song> songs = new ArrayList<>();
-    private boolean isInPlaylistDetail = false; // CỜ QUAN TRỌNG!!!
-    private String currentPlaylistId = null;    // ID của playlist hiện tại (nếu có)
+    private boolean isInPlaylistDetail = false;
+    private String currentPlaylistId = null;
 
-    // Dùng để ẩn/hiện nút + và nút xóa
+    // Local list
+    private final List<String> favoriteSongIds = new ArrayList<>();
+
+    // GLOBAL list để fragment khác đọc được
+    private static final List<String> globalFavoriteSongIds = new ArrayList<>();
+
+    public void setFavoriteSongIds(List<String> ids) {
+        favoriteSongIds.clear();
+        if (ids != null) favoriteSongIds.addAll(ids);
+        notifyDataSetChanged();
+    }
+
+    public static void setGlobalFavoriteSongIds(List<String> ids) {
+        globalFavoriteSongIds.clear();
+        if (ids != null) globalFavoriteSongIds.addAll(ids);
+    }
+
+    public interface OnSongRemovedListener {
+        void onSongRemoved();
+    }
+
+    public interface OnFavoriteChangedListener {
+        void onFavoriteChanged();
+    }
+
+    private OnSongRemovedListener onSongRemovedListener;
+    private OnFavoriteChangedListener onFavoriteChangedListener;
+
+    public void setOnSongRemovedListener(OnSongRemovedListener listener) {
+        this.onSongRemovedListener = listener;
+    }
+
+    public void setOnFavoriteChangedListener(OnFavoriteChangedListener listener) {
+        this.onFavoriteChangedListener = listener;
+    }
+
     public void setInPlaylistDetail(boolean inPlaylistDetail, String playlistId) {
         this.isInPlaylistDetail = inPlaylistDetail;
         this.currentPlaylistId = playlistId;
         notifyDataSetChanged();
     }
+
     public void setSongs(List<Song> songs) {
         this.songs.clear();
         if (songs != null) this.songs.addAll(songs);
@@ -54,30 +91,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     public List<Song> getSongs() {
         return new ArrayList<>(songs);
     }
-
-    // Thêm interface này vào trong class SongAdapter
-    public interface OnSongRemovedListener {
-        void onSongRemoved();
-    }
-
-    // Thêm biến
-    private OnSongRemovedListener onSongRemovedListener;
-
-    public void setOnSongRemovedListener(OnSongRemovedListener listener) {
-        this.onSongRemovedListener = listener;
-    }
-
-    public interface OnFavoriteChangedListener {
-        void onFavoriteChanged();
-    }
-
-    private OnFavoriteChangedListener onFavoriteChangedListener;
-
-    public void setOnFavoriteChangedListener(OnFavoriteChangedListener listener) {
-        this.onFavoriteChangedListener = listener;
-    }
-
-
 
     @NonNull
     @Override
@@ -96,14 +109,12 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         holder.tvGenre.setText(song.getGenre() != null ? song.getGenre().getName() : "Không rõ");
         holder.tvPlayCount.setText(song.getPlayCount() + " lượt nghe");
 
-        // Load ảnh
         String fixedImageUrl = song.getImageUrl() != null ? song.getImageUrl().replace("\\", "/") : "";
         Glide.with(holder.itemView.getContext())
                 .load(BASE_URL + fixedImageUrl)
                 .placeholder(R.drawable.ic_music_note)
                 .into(holder.imgCover);
 
-        // ẨN/HIỆN NÚT THEO TRẠNG THÁI
         if (isInPlaylistDetail) {
             holder.btnAddToPlaylist.setVisibility(View.GONE);
             holder.btnRemoveFromPlaylist.setVisibility(View.VISIBLE);
@@ -112,7 +123,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
             holder.btnRemoveFromPlaylist.setVisibility(View.GONE);
         }
 
-        // Phát nhạc
         holder.itemView.setOnClickListener(v -> {
             PlayerManager.getInstance().playSong(song);
 
@@ -128,14 +138,49 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
             }
         });
 
-        // Nút thêm vào playlist
         holder.btnAddToPlaylist.setOnClickListener(v -> showPlaylistSelectionDialog(v.getContext(), song));
 
-        // Nút xoá khỏi playlist (chỉ hiện trong PlaylistDetail)
         holder.btnRemoveFromPlaylist.setOnClickListener(v -> {
             if (currentPlaylistId != null) {
                 removeSongFromPlaylist(currentPlaylistId, song.get_id(), v.getContext());
             }
+        });
+
+        // ==== FAVORITE ICON ====
+        if (globalFavoriteSongIds.contains(song.get_id())) {
+            holder.btnFavorite.setImageResource(R.drawable.ic_favorite_fill);
+        } else {
+            holder.btnFavorite.setImageResource(R.drawable.ic_favorite_border);
+        }
+
+        // ==== TOGGLE FAVORITE ====
+        holder.btnFavorite.setOnClickListener(v -> {
+            ApiService api = RetrofitClient.getClient().create(ApiService.class);
+
+            api.toggleFavorite(new ToggleFavoriteRequest(song.get_id()))
+                    .enqueue(new Callback<FavoriteResponse>() {
+                        @Override
+                        public void onResponse(Call<FavoriteResponse> call, Response<FavoriteResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+
+                                // API trả về List<Song>, không phải List<String>
+                                List<String> ids = new ArrayList<>();
+                                for (Song fav : response.body().getFavorites()) {
+                                    ids.add(fav.get_id());
+                                }
+
+                                setGlobalFavoriteSongIds(ids);
+
+                                if (onFavoriteChangedListener != null)
+                                    onFavoriteChangedListener.onFavoriteChanged();
+
+                                notifyDataSetChanged();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<FavoriteResponse> call, Throwable t) {}
+                    });
         });
     }
 
@@ -145,7 +190,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     }
 
     static class SongViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgCover, btnAddToPlaylist, btnRemoveFromPlaylist;
+        ImageView imgCover, btnAddToPlaylist, btnRemoveFromPlaylist, btnFavorite;
         TextView tvTitle, tvArtist, tvGenre, tvPlayCount;
 
         public SongViewHolder(@NonNull View itemView) {
@@ -157,10 +202,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
             tvPlayCount = itemView.findViewById(R.id.tv_play_count);
             btnAddToPlaylist = itemView.findViewById(R.id.btn_add_to_playlist);
             btnRemoveFromPlaylist = itemView.findViewById(R.id.btn_remove_from_playlist);
+            btnFavorite = itemView.findViewById(R.id.btn_favourite);
         }
     }
 
-    // === HÀM THÊM VÀO PLAYLIST ===
+    // ================== ADD / REMOVE PLAYLIST ==================
     private void showPlaylistSelectionDialog(Context context, Song song) {
         ApiService api = RetrofitClient.getClient().create(ApiService.class);
         api.getMyPlaylists().enqueue(new Callback<List<Playlist>>() {
@@ -174,9 +220,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                     }
 
                     String[] names = new String[playlists.size()];
-                    for (int i = 0; i < playlists.size(); i++) {
+                    for (int i = 0; i < playlists.size(); i++)
                         names[i] = playlists.get(i).getName();
-                    }
 
                     new AlertDialog.Builder(context)
                             .setTitle("Thêm vào playlist")
@@ -214,7 +259,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                 });
     }
 
-    // === HÀM XOÁ KHỎI PLAYLIST ===
     private void removeSongFromPlaylist(String playlistId, String songId, Context context) {
         new AlertDialog.Builder(context)
                 .setTitle("Xoá bài hát")
@@ -225,13 +269,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                             .enqueue(new Callback<PlaylistResponse>() {
                                 @Override
                                 public void onResponse(Call<PlaylistResponse> call, Response<PlaylistResponse> response) {
-                                    if (response.isSuccessful()) {
+                                    if (response.isSuccessful() && onSongRemovedListener != null) {
                                         Toast.makeText(context, "Đã xoá khỏi playlist", Toast.LENGTH_SHORT).show();
-
-                                        // GỌI CALLBACK ĐỂ REFRESH
-                                        if (onSongRemovedListener != null) {
-                                            onSongRemovedListener.onSongRemoved();
-                                        }
+                                        onSongRemovedListener.onSongRemoved();
                                     }
                                 }
 
@@ -244,6 +284,4 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                 .setNegativeButton("Hủy", null)
                 .show();
     }
-
-
 }

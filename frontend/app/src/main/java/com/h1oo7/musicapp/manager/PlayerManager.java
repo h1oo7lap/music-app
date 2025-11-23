@@ -1,4 +1,4 @@
-package com.h1oo7.musicapp.player;
+package com.h1oo7.musicapp.manager;
 
 import android.content.Context;
 import android.net.Uri;

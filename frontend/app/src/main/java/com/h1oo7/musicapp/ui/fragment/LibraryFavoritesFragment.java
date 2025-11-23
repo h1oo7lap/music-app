@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,6 +18,7 @@ import com.h1oo7.musicapp.network.ApiService;
 import com.h1oo7.musicapp.network.RetrofitClient;
 import com.h1oo7.musicapp.ui.adapter.SongAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -27,21 +27,20 @@ import retrofit2.Response;
 
 public class LibraryFavoritesFragment extends Fragment {
 
-    private RecyclerView recyclerFavorites;
-    private TextView tvEmpty;
+    private RecyclerView recyclerView;
     private SongAdapter adapter;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_library_favorites, container, false);
 
-        recyclerFavorites = view.findViewById(R.id.recycler_favorites);
-        tvEmpty = view.findViewById(R.id.tv_empty_favorites);
+        recyclerView = view.findViewById(R.id.recycler_favorites);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        recyclerFavorites.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new SongAdapter();
-        recyclerFavorites.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
 
         loadFavoriteSongs();
 
@@ -54,33 +53,32 @@ public class LibraryFavoritesFragment extends Fragment {
         api.getFavoriteSongs().enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Song> favorites = response.body();
-                    adapter.setSongs(favorites);
-
-                    if (favorites.isEmpty()) {
-                        tvEmpty.setVisibility(View.VISIBLE);
-                        recyclerFavorites.setVisibility(View.GONE);
-                        tvEmpty.setText("Chưa có bài hát yêu thích\nBấm vào để thêm");
-                    } else {
-                        tvEmpty.setVisibility(View.GONE);
-                        recyclerFavorites.setVisibility(View.VISIBLE);
-                    }
+                if (!response.isSuccessful() || response.body() == null) {
+                    Toast.makeText(getContext(), "Không tải được yêu thích", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                List<Song> favorites = response.body();
+
+                // Lấy danh sách ID yêu thích để adapter vẽ icon trái tim
+                List<String> ids = new ArrayList<>();
+                for (Song s : favorites) ids.add(s.get_id());
+                SongAdapter.setGlobalFavoriteSongIds(ids);
+
+                // Hiển thị danh sách lên RecyclerView
+                adapter.setSongs(favorites);
             }
 
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
-                Toast.makeText(requireContext(), "Lỗi tải danh sách yêu thích", Toast.LENGTH_SHORT).show();
-                tvEmpty.setVisibility(View.VISIBLE);
-                tvEmpty.setText("Không thể tải dữ liệu");
-                recyclerFavorites.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Lỗi kết nối", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // GỌI KHI CÓ BÀI HÁT ĐƯỢC THÊM/XÓA YÊU THÍCH Ở NƠI KHÁC
-    public void refreshFavorites() {
-        loadFavoriteSongs();
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadFavoriteSongs(); // refresh khi quay lại tab
     }
 }

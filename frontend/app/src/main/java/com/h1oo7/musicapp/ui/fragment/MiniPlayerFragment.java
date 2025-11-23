@@ -15,7 +15,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.bumptech.glide.Glide;
 import com.h1oo7.musicapp.R;
 import com.h1oo7.musicapp.model.Song;
-import com.h1oo7.musicapp.player.PlayerManager;
+import com.h1oo7.musicapp.manager.PlayerManager;
 import com.h1oo7.musicapp.utils.Constants;
 
 public class MiniPlayerFragment extends Fragment {
@@ -36,7 +36,7 @@ public class MiniPlayerFragment extends Fragment {
         btnPlayPause = view.findViewById(R.id.btn_play_pause);
 
         view.setOnClickListener(v -> {
-            PlayerManager.getInstance().notifyListeners(); // Cập nhật trước khi mở full player
+            PlayerManager.getInstance().notifyListeners(); // Cập nhật trước khi mở full manager
             NavHostFragment.findNavController(this)
                     .navigate(R.id.action_global_playerFragment);
         });
