@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -49,16 +50,18 @@ public class LibraryFavoritesFragment extends Fragment {
 
     private void loadFavoriteSongs() {
         ApiService api = RetrofitClient.getClient().create(ApiService.class);
+
         api.getFavoriteSongs().enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Song> songs = response.body();
-                    adapter.setSongs(songs);
+                    List<Song> favorites = response.body();
+                    adapter.setSongs(favorites);
 
-                    if (songs.isEmpty()) {
+                    if (favorites.isEmpty()) {
                         tvEmpty.setVisibility(View.VISIBLE);
                         recyclerFavorites.setVisibility(View.GONE);
+                        tvEmpty.setText("Chưa có bài hát yêu thích\nBấm vào để thêm");
                     } else {
                         tvEmpty.setVisibility(View.GONE);
                         recyclerFavorites.setVisibility(View.VISIBLE);
@@ -68,10 +71,16 @@ public class LibraryFavoritesFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<Song>> call, Throwable t) {
+                Toast.makeText(requireContext(), "Lỗi tải danh sách yêu thích", Toast.LENGTH_SHORT).show();
                 tvEmpty.setVisibility(View.VISIBLE);
-                tvEmpty.setText("Lỗi tải danh sách yêu thích");
+                tvEmpty.setText("Không thể tải dữ liệu");
                 recyclerFavorites.setVisibility(View.GONE);
             }
         });
+    }
+
+    // GỌI KHI CÓ BÀI HÁT ĐƯỢC THÊM/XÓA YÊU THÍCH Ở NƠI KHÁC
+    public void refreshFavorites() {
+        loadFavoriteSongs();
     }
 }

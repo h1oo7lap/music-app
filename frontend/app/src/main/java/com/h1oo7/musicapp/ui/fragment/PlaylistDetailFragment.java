@@ -40,6 +40,7 @@ public class PlaylistDetailFragment extends Fragment {
     private MaterialButton btnPlayAll;
     private RecyclerView recyclerSongs;
     private SongAdapter adapter;
+    private String currentPlaylistId; // Lưu lại ID để dùng khi xoá
 
     public static PlaylistDetailFragment newInstance(String playlistId, String playlistName) {
         PlaylistDetailFragment fragment = new PlaylistDetailFragment();
@@ -66,19 +67,30 @@ public class PlaylistDetailFragment extends Fragment {
         btnPlayAll.setOnClickListener(v -> playAllSongs());
 
         if (getArguments() != null) {
-            String playlistId = getArguments().getString(ARG_PLAYLIST_ID);
+            currentPlaylistId = getArguments().getString(ARG_PLAYLIST_ID);
             String playlistName = getArguments().getString(ARG_PLAYLIST_NAME);
             tvName.setText(playlistName);
-            loadPlaylistSongs(playlistId);
+            loadPlaylistSongs(currentPlaylistId);
         }
 
+        adapter.setInPlaylistDetail(true, currentPlaylistId);
         return view;
     }
 
     private void setupRecyclerView() {
         recyclerSongs.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new SongAdapter();
+
+        adapter.setOnSongRemovedListener(() -> loadPlaylistSongs(currentPlaylistId));
+
         recyclerSongs.setAdapter(adapter);
+    }
+
+
+    public void refreshPlaylist() {
+        if (currentPlaylistId != null) {
+            loadPlaylistSongs(currentPlaylistId);
+        }
     }
 
     private void loadPlaylistSongs(String playlistId) {

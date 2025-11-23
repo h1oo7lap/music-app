@@ -16,9 +16,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="Chưa có bài hát yêu thích"
+        android:text="Chưa có bài hát yêu thích\nBấm vào để thêm"
         android:textColor="#888888"
         android:textSize="18sp"
+        android:padding="32dp"
+        android:textAlignment="center"
         android:visibility="gone" />
 
 </FrameLayout>
