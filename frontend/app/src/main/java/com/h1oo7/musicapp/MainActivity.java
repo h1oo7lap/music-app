@@ -53,18 +53,33 @@ public class MainActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNav = binding.bottomNavigation;
 
-        // --- Thay đổi: lắng nghe click thủ công ---
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
+
             if (id == R.id.homeFragment) {
-                // Luôn navigate về HomeFragment
+                // Reset HomeFragment
+                navController.popBackStack(R.id.homeFragment, true);
                 navController.navigate(R.id.homeFragment);
                 return true;
-            } else {
-                // Các nút khác vẫn giữ hành vi cũ
-                return NavigationUI.onNavDestinationSelected(item, navController);
             }
+
+            if (id == R.id.searchFragment) {
+                // Reset SearchFragment
+                navController.popBackStack(R.id.searchFragment, true);
+                navController.navigate(R.id.searchFragment);
+                return true;
+            }
+            if (id == R.id.libraryFragment) {
+                // Reset LibraryFragment
+                navController.popBackStack(R.id.libraryFragment, true);
+                navController.navigate(R.id.libraryFragment);
+                return true;
+            }
+
+            // Các tab khác giữ behavior mặc định
+            return NavigationUI.onNavDestinationSelected(item, navController);
         });
+
 
         // ẨN/HIỆN TAB QUẢN TRỊ THEO ROLE
         String role = SharedPrefManager.getInstance(this).getUserRole();

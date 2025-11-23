@@ -7,6 +7,7 @@ import retrofit2.http.*;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import java.util.List;
+import java.util.Map;
 
 public interface ApiService {
 
@@ -88,6 +89,36 @@ public interface ApiService {
     // Xóa thể loại (Admin)
     @DELETE("api/genres/{id}")
     Call<Void> deleteGenre(@Path("id") String genreId);
+
+    // ------------------------------------------------------------------
+    // Playlist
+    // Playlist
+    @GET("api/playlists/my")
+    Call<List<Playlist>> getMyPlaylists(@Header("Authorization") String token);
+
+    @POST("api/playlists")
+    Call<Playlist> createPlaylist(
+            @Header("Authorization") String token,
+            @Body Map<String, Object> body // { "name": "Playlist 1", "isPublic": true }
+    );
+
+    @DELETE("api/playlists/{id}")
+    Call<Void> deletePlaylist(
+            @Header("Authorization") String token,
+            @Path("id") String playlistId
+    );
+
+    @PUT("api/playlists/add")
+    Call<Playlist> addSongToPlaylist(
+            @Header("Authorization") String token,
+            @Body Map<String, String> body // { "playlistId": "...", "songId": "..." }
+    );
+
+    @PUT("api/playlists/remove")
+    Call<Playlist> removeSongFromPlaylist(
+            @Header("Authorization") String token,
+            @Body Map<String, String> body
+    );
 
 
 }
