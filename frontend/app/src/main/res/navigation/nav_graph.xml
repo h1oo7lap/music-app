@@ -8,7 +8,7 @@
     <fragment android:id="@+id/searchFragment"  android:name="com.h1oo7.musicapp.ui.fragment.SearchFragment" />
     <fragment android:id="@+id/libraryFragment" android:name="com.h1oo7.musicapp.ui.fragment.LibraryFragment" />
     <fragment android:id="@+id/profileFragment" android:name="com.h1oo7.musicapp.ui.fragment.ProfileFragment" />
-    <fragment android:id="@+id/adminFragment"   android:name="com.h1oo7.musicapp.ui.fragment.AdminFragment" />
+    <fragment android:id="@+id/adminFragment"   android:name="com.h1oo7.musicapp.ui.fragment.AdminSongsFragment" />
     <!-- Player full màn hình -->
     <fragment
         android:id="@+id/playerFragment"
