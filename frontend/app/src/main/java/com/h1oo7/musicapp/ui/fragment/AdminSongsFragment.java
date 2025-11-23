@@ -3,7 +3,6 @@ package com.h1oo7.musicapp.ui.fragment;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +27,7 @@ import com.h1oo7.musicapp.network.RetrofitClient;
 import com.h1oo7.musicapp.ui.adapter.AdminSongAdapter;
 
 import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import okhttp3.MediaType;
@@ -145,31 +145,42 @@ public class AdminSongsFragment extends Fragment {
         dialog.show();
     }
 
+    private byte[] readBytesFromUri(Uri uri) throws Exception {
+        InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+        int bufferSize = 1024;
+        byte[] buffer = new byte[bufferSize];
+        int len;
+        while ((len = inputStream.read(buffer)) != -1) {
+            byteBuffer.write(buffer, 0, len);
+        }
+        return byteBuffer.toByteArray();
+    }
+
     private void uploadSong(String title, String artist, String genreId) {
         try {
-            InputStream songStream = requireContext().getContentResolver().openInputStream(songUri);
-            InputStream imageStream = requireContext().getContentResolver().openInputStream(imageUri);
+            MultipartBody.Part songFile = null;
+            MultipartBody.Part albumImage = null;
+
+            if (songUri != null) {
+                songFile = MultipartBody.Part.createFormData("songFile", "song.mp3",
+                        RequestBody.create(readBytesFromUri(songUri), MediaType.parse("audio/*")));
+            }
+
+            if (imageUri != null) {
+                albumImage = MultipartBody.Part.createFormData("albumImage", "cover.jpg",
+                        RequestBody.create(readBytesFromUri(imageUri), MediaType.parse("image/*")));
+            }
 
             RequestBody titlePart = RequestBody.create(title, MediaType.parse("text/plain"));
             RequestBody artistPart = RequestBody.create(artist, MediaType.parse("text/plain"));
             RequestBody genrePart = RequestBody.create(genreId, MediaType.parse("text/plain"));
 
-            MultipartBody.Part songFile = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                songFile = MultipartBody.Part.createFormData("songFile", "song.mp3",
-                        RequestBody.create(songStream.readAllBytes(), MediaType.parse("audio/*")));
-            }
-            MultipartBody.Part albumImage = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                albumImage = MultipartBody.Part.createFormData("albumImage", "cover.jpg",
-                        RequestBody.create(imageStream.readAllBytes(), MediaType.parse("image/*")));
-            }
-
             ApiService api = RetrofitClient.getClient().create(ApiService.class);
             api.uploadSong(titlePart, artistPart, genrePart, songFile, albumImage)
                     .enqueue(new Callback<Song>() {
                         @Override
-                        public void onResponse(Call<Song> call, retrofit2.Response<Song> response) {
+                        public void onResponse(Call<Song> call, Response<Song> response) {
                             if (response.isSuccessful()) {
                                 Toast.makeText(requireContext(), "Upload thành công!", Toast.LENGTH_SHORT).show();
                                 loadAllSongs();
@@ -183,7 +194,6 @@ public class AdminSongsFragment extends Fragment {
                             Toast.makeText(requireContext(), "Lỗi upload", Toast.LENGTH_SHORT).show();
                         }
                     });
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -191,30 +201,23 @@ public class AdminSongsFragment extends Fragment {
 
     private void updateSong(String songId, String title, String artist, String genreId) {
         try {
-            InputStream songStream = songUri != null ? requireContext().getContentResolver().openInputStream(songUri) : null;
-            InputStream imageStream = imageUri != null ? requireContext().getContentResolver().openInputStream(imageUri) : null;
+            MultipartBody.Part songFile = songUri != null ?
+                    MultipartBody.Part.createFormData("songFile", "song.mp3",
+                            RequestBody.create(readBytesFromUri(songUri), MediaType.parse("audio/*"))) : null;
+
+            MultipartBody.Part albumImage = imageUri != null ?
+                    MultipartBody.Part.createFormData("albumImage", "cover.jpg",
+                            RequestBody.create(readBytesFromUri(imageUri), MediaType.parse("image/*"))) : null;
 
             RequestBody titlePart = RequestBody.create(title, MediaType.parse("text/plain"));
             RequestBody artistPart = RequestBody.create(artist, MediaType.parse("text/plain"));
             RequestBody genrePart = RequestBody.create(genreId, MediaType.parse("text/plain"));
 
-            MultipartBody.Part songFile = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                songFile = songStream != null ? MultipartBody.Part.createFormData("songFile", "song.mp3",
-                        RequestBody.create(songStream.readAllBytes(), MediaType.parse("audio/*"))) : null;
-            }
-
-            MultipartBody.Part albumImage = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                albumImage = imageStream != null ? MultipartBody.Part.createFormData("albumImage", "cover.jpg",
-                        RequestBody.create(imageStream.readAllBytes(), MediaType.parse("image/*"))) : null;
-            }
-
             ApiService api = RetrofitClient.getClient().create(ApiService.class);
             api.updateSong(songId, titlePart, artistPart, genrePart, songFile, albumImage)
                     .enqueue(new Callback<Song>() {
                         @Override
-                        public void onResponse(Call<Song> call, retrofit2.Response<Song> response) {
+                        public void onResponse(Call<Song> call, Response<Song> response) {
                             if (response.isSuccessful()) {
                                 Toast.makeText(requireContext(), "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
                                 loadAllSongs();
@@ -228,7 +231,6 @@ public class AdminSongsFragment extends Fragment {
                             Toast.makeText(requireContext(), "Lỗi cập nhật", Toast.LENGTH_SHORT).show();
                         }
                     });
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -238,7 +240,7 @@ public class AdminSongsFragment extends Fragment {
         ApiService api = RetrofitClient.getClient().create(ApiService.class);
         api.deleteSong(songId).enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, retrofit2.Response<Void> response) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(requireContext(), "Xóa thành công", Toast.LENGTH_SHORT).show();
                     loadAllSongs();
@@ -258,7 +260,7 @@ public class AdminSongsFragment extends Fragment {
         ApiService api = RetrofitClient.getClient().create(ApiService.class);
         api.getAllSongs(1, 100, "").enqueue(new Callback<SongResponse>() {
             @Override
-            public void onResponse(Call<SongResponse> call, retrofit2.Response<SongResponse> response) {
+            public void onResponse(Call<SongResponse> call, Response<SongResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Song> list = response.body().getSongs();
                     adapter.setSongs(list);

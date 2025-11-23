@@ -56,22 +56,22 @@ public interface ApiService {
     Call<Song> uploadSong(
             @Part("title") RequestBody title,
             @Part("artist") RequestBody artist,
-            @Part("genre") RequestBody genreId,
+            @Part("genre") RequestBody genre,
             @Part MultipartBody.Part songFile,
-            @Part MultipartBody.Part imageFile
+            @Part MultipartBody.Part albumImage
     );
 
-    // Admin: Cập nhật bài hát (PUT, Multipart)
     @Multipart
     @PUT("api/songs/{id}")
     Call<Song> updateSong(
-            @Path("id") String songId,
+            @Path("id") String id,
             @Part("title") RequestBody title,
             @Part("artist") RequestBody artist,
-            @Part("genre") RequestBody genreId,
-            @Part MultipartBody.Part songFile,      // optional
-            @Part MultipartBody.Part imageFile      // optional
+            @Part("genre") RequestBody genre,
+            @Part MultipartBody.Part songFile,
+            @Part MultipartBody.Part albumImage
     );
+
 
     // Admin: Xóa bài hát
     @DELETE("api/songs/{id}")
