@@ -22,60 +22,6 @@ import com.h1oo7.musicapp.model.Song;
 import com.h1oo7.musicapp.manager.PlayerManager;
 import com.h1oo7.musicapp.utils.Constants;
 
-//public class PlayerFragment extends Fragment {
-//
-//    private ImageView imgCover;
-//    private TextView tvTitle, tvArtist;
-//    private ImageButton btnPlayPause;
-//
-//    private final Runnable updateUIRunnable = this::updateUI;
-//
-//    @Override
-//    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        View view = inflater.inflate(R.layout.fragment_player, container, false);
-//
-//        imgCover = view.findViewById(R.id.img_cover_big);
-//        tvTitle = view.findViewById(R.id.tv_title_big);
-//        tvArtist = view.findViewById(R.id.tv_artist_big);
-//        btnPlayPause = view.findViewById(R.id.btn_play_pause_big);
-//
-//        btnPlayPause.setOnClickListener(v -> PlayerManager.getInstance().playOrPause());
-//        PlayerManager.getInstance().addListener(updateUIRunnable);
-//
-//        view.post(() -> {
-//            updateUI();
-//            view.postDelayed(this::updateUI, 300);
-//        });
-//
-//        return view;
-//    }
-//
-//    private void updateUI() {
-//        Song song = PlayerManager.getInstance().getCurrentSong();
-//        if (song == null || getView() == null) return;
-//
-//        tvTitle.setText(song.getTitle());
-//        tvArtist.setText(song.getArtist());
-//
-//        String imageUrl = Constants.BASE_URL + song.getImageUrl().replace("\\", "/");
-//        Glide.with(this)
-//                .load(imageUrl)
-//                .placeholder(R.drawable.ic_music_note)
-//                .into(imgCover);
-//
-//        btnPlayPause.setImageResource(
-//                PlayerManager.getInstance().isPlaying()
-//                        ? R.drawable.ic_pause_circle_48
-//                        : R.drawable.ic_play_circle_48
-//        );
-//    }
-//
-//    @Override
-//    public void onDestroyView() {
-//        super.onDestroyView();
-//        PlayerManager.getInstance().removeListener(updateUIRunnable);
-//    }
-//}
 
 public class PlayerFragment extends Fragment {
 
@@ -179,13 +125,13 @@ public class PlayerFragment extends Fragment {
         rotateAnimation.setRepeatCount(Animation.INFINITE);
         rotateAnimation.setInterpolator(new LinearInterpolator());
 
-        discContainer.startAnimation(rotateAnimation); // QUAN TRỌNG: DÙNG discContainer!
+        discContainer.startAnimation(rotateAnimation);
     }
 
     private void pauseDiscRotation() {
         if (rotateAnimation != null) {
             rotateAnimation.cancel();
-            discContainer.clearAnimation(); // Thêm dòng này
+            discContainer.clearAnimation();
         }
     }
 

@@ -29,11 +29,11 @@ public class PlayerManager {
         if (exoPlayer == null) {
             exoPlayer = new ExoPlayer.Builder(context).build();
 
-            // ←←← ĐOẠN NÀY LÀ "THẦN DƯỢC" CUỐI CÙNG ←←←
+
             exoPlayer.addListener(new Player.Listener() {
                 @Override
                 public void onIsPlayingChanged(boolean isPlaying) {
-                    notifyListeners(); // Đảm bảo UI cập nhật đúng trạng thái thực
+                    notifyListeners();
                 }
 
                 @Override
@@ -43,7 +43,7 @@ public class PlayerManager {
                     }
                 }
             });
-            // ←←← KẾT THÚC ←←←
+
         }
     }
 
@@ -58,7 +58,7 @@ public class PlayerManager {
         exoPlayer.prepare();
         exoPlayer.play();
 
-        notifyListeners(); // ← Cập nhật UI ngay khi bắt đầu phát
+        notifyListeners();
     }
 
     public ExoPlayer getExoPlayer() { return exoPlayer; }
@@ -72,7 +72,7 @@ public class PlayerManager {
         } else {
             exoPlayer.play();
         }
-        notifyListeners(); // ← QUAN TRỌNG: Phải có dòng này!
+        notifyListeners();
     }
 
     public void addListener(Runnable listener) {

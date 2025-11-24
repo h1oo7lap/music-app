@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
         // Init Player
         PlayerManager.getInstance().init(this);
 
-        // KHÔNG ADD MINI PLAYER Ở ĐÂY NỮA
 
         // Setup Navigation
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
